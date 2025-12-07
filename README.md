@@ -3,7 +3,7 @@
 ![Build Status](https://github.com/jambolo/advent-of-code-2025-visualizations/actions/workflows/ci.yml/badge.svg)
 ![Coverage Status](https://coveralls.io/repos/github/jambolo/advent-of-code-2025-visualizations/badge.svg?branch=main)
 
-This repository contains multiple TypeScript browser applications that support turning an Advent of Code 2025 solver into a recorded visualization.
+This repository contains visualization applications for each of my solutions to Advent of Code 2025.
 
 ## Purpose
 
