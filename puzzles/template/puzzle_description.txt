@@ -1,0 +1,3 @@
+# Puzzle Description Placeholder
+
+Replace this text with the full Advent of Code puzzle statement before starting the visualization workflow.

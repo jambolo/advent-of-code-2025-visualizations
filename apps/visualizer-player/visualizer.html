@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AoC Log Player</title>
+    <style>
+      body {
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        margin: 0;
+        background: #0f172a;
+        color: #e2e8f0;
+      }
+      header,
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      #visualizer-canvas {
+        border: 2px solid #38bdf8;
+        border-radius: 8px;
+        display: block;
+        width: 100%;
+        max-width: 960px;
+        height: 600px;
+        background: #0b1021;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-top: 12px;
+      }
+      button {
+        background: #38bdf8;
+        color: #0b1021;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #22d3ee;
+      }
+      a {
+        color: #38bdf8;
+      }
+      .status {
+        margin-top: 8px;
+        font-size: 14px;
+      }
+      .stat-line {
+        font-size: 14px;
+        color: #cbd5e1;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Advent of Code Log Player</h1>
+      <div>
+        <span class="stat-line">FPS: <strong id="fps-value">–</strong></span>
+        <span class="stat-line" style="margin-left: 8px">Stride: <strong id="stride-value">–</strong></span>
+      </div>
+    </header>
+    <main>
+      <p>
+        Load a <code>log.json</code> file produced by your instrumented solver. Preview the sampled frames, then
+        record a <code>webm</code> animation directly in the browser.
+      </p>
+      <canvas id="visualizer-canvas" width="960" height="600"></canvas>
+      <div class="controls">
+        <label for="log-file">log.json</label>
+        <input id="log-file" type="file" accept="application/json" />
+        <button id="play-button" type="button">Preview Frames</button>
+        <button id="record-button" type="button">Record Animation</button>
+        <a id="download-link" style="display: none"></a>
+      </div>
+      <div id="load-status" class="status"></div>
+    </main>
+    <script type="module" src="../../dist/apps/visualizer-player/visualizer.js"></script>
+  </body>
+</html>

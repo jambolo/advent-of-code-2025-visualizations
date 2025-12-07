@@ -1,0 +1,16 @@
+{
+  "puzzle": {
+    "title": "Template Puzzle",
+    "description": "Replace with the puzzle overview."
+  },
+  "theme": {
+    "primaryMood": "space",
+    "backgroundStyle": "dark",
+    "fontStyle": "mono"
+  },
+  "config": {
+    "fps": 30,
+    "maxDurationSec": 300
+  },
+  "timeline": []
+}
