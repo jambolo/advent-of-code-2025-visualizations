@@ -1,10 +1,13 @@
-You are ChatGPT-Codex, acting as an expert Rust analyst, TypeScript engineer, and visualization designer.
+# **Implementation Prompt**
+
+You are acting as an expert Rust analyst, TypeScript engineer, and visualization designer.
 
 Your job for a single Advent-of-Code-style puzzle has three steps:
 
 1) Analyze the solver code, puzzle input, and puzzle description, and produce markdown design documents.  
 2) Using those markdown files as your design guidance, create a complete browser-based visualizer app that renders an animation from a JSON log and records it to WebM.  
 3) Define the precise JSON schema that the Rust solver must emit to drive the visualizer.
+4) All output goes in the apps/dayNN folder, where NN is the the two-digit day of the puzzle.
 
 You must not write or modify any Rust code.
 
@@ -12,7 +15,7 @@ You must not write or modify any Rust code.
 INPUTS PROVIDED
 ────────────────
 
-• dayNN-description.txt (The puzzle description. The description contains two parts. Part 1 contains information relevant to part 2, but only part 2 is visualized. The description also contains the final result of the puzzle.)
+• dayNN-description.txt (The puzzle description) The puzzle consists of two parts, and the description describe each of them. Only Part 2 is to be visualized; however, the description of Part 1 contains information relevant to part 2. The description also contains the final result of the puzzle.
 • dayNN-input.txt (puzzle input)
 • main.rs (the completed solver, written in Rust)  
 
@@ -28,7 +31,7 @@ input_summary.md
 • Summarize puzzle purpose and goals.  
 • Describe the solver algorithm conceptually and identify important evolving state.  
 • Define natural visualization steps.  
-• Identify what must be visualized to understand solver_result.txt.
+• Identify what must be visualized to understand the result.
 
 visual_theme.md  
 • Infer theme from puzzle description.  
@@ -39,8 +42,8 @@ visual_theme.md
 emission_rules.md  
 • Define when conceptual steps should be emitted.  
 • Describe what changes merit a frame.  
-• Define sampling strategy to keep animation ≤5 minutes.  
-• Show how progression toward solver_result.txt should appear.
+• Define sampling strategy to keep animation < 5 minutes.  
+• Show how progression toward the result should appear.
 
 (Do not include any TypeScript or JSON here.)
 
@@ -59,8 +62,10 @@ A) The **full visualizer application** (TypeScript + minimal HTML/CSS).
    • Apply theme.  
    • Choose the lowest adequate resolution: 480p, 720p, or 1080p (justify in comments).  
    • Use requestAnimationFrame or timers for playback.  
-   • Use canvas.captureStream + MediaRecorder for WebM output.  
-   • Highlight or show the solver_result.txt meaningfully.
+   • Use canvas.captureStream + MediaRecorder for WebM output. Detect supported mime types with MediaRecorder.isTypeSupported (try vp9 → vp8 → generic WebM), and fall back gracefully (warn/alert) instead of hardcoding an unsupported codec.  
+   • Highlight or show the result meaningfully.
+   • Display the puzzle name and day number prominently in the visualization UI so viewers know which puzzle solution they are watching.
+   • Include a selector to adjust playback speed by 0.5 to 5 times normal.
    • The name of the file containing the typescript code should be `dayNN-visualizer.ts`, where NN is the two-digit day of the puzzle.
 
 B) visualizer_annotation.md  
