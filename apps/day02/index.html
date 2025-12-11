@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 02 - Gift Shop Receipt Scanner</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0c0a;
+      color: #f7f1e7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    h1 { margin-bottom: 16px; color: #f6c344; text-align: center; }
+    .container { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; max-width: 1320px; }
+    .controls {
+      display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center;
+      padding: 16px; background: #1d1a1f; border-radius: 10px; border: 2px solid #2d2a32;
+    }
+    button, select, .file-input-label {
+      padding: 12px 18px; font-size: 15px; border-radius: 6px; border: 2px solid #5be7c4;
+      background: #2d2a32; color: #f7f1e7; cursor: pointer; transition: all 0.2s ease;
+      font-family: 'Courier New', monospace;
+    }
+    button:hover:not(:disabled), select:hover, .file-input-label:hover { border-color: #e63946; transform: translateY(-1px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    canvas {
+      border: 3px solid #2d2a32; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.55);
+      background: linear-gradient(180deg, #120f14 0%, #0a0809 100%);
+    }
+    .info {
+      background: #1d1a1f; border: 2px solid #2d2a32; border-radius: 10px; padding: 14px 18px;
+      max-width: 900px; text-align: center; color: #cfc7be;
+    }
+    .highlight { color: #f6c344; font-weight: bold; }
+    .file-input-wrapper { position: relative; display: inline-block; }
+    input[type="file"] { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎁 Day 02: Gift Shop Receipt Scanner</h1>
+
+    <div class="info">
+      <p>Scan product IDs across gift shop ranges and spot numbers made of repeated digit chunks.</p>
+      <p>Load a JSON log produced by the solver; the visualization highlights repeats and the running invalid total.</p>
+    </div>
+
+    <div class="controls">
+      <div class="file-input-wrapper">
+        <input type="file" id="fileInput" accept=".json">
+        <label class="file-input-label" for="fileInput">📁 Load JSON Log</label>
+      </div>
+      <label for="speedSelect">Speed</label>
+      <select id="speedSelect">
+        <option value="0.5">0.5x</option>
+        <option value="0.75">0.75x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+        <option value="3">3x</option>
+        <option value="4">4x</option>
+        <option value="5">5x</option>
+      </select>
+      <button id="startBtn" disabled>▶ Play</button>
+      <button id="recordBtn" disabled>⏺ Record WebM</button>
+      <button id="stopBtn" disabled>⏹ Stop</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="info">
+      <p><span class="highlight">Play</span>: Start the animation from the current frame.</p>
+      <p><span class="highlight">Record WebM</span>: Restart from the beginning and export a video of the run.</p>
+      <p><span class="highlight">Stop</span>: Halt playback and finish recording if active.</p>
+    </div>
+  </div>
+
+  <script type="module" src="day02-visualizer.js"></script>
+</body>
+</html>
