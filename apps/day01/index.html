@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 01 - Secret Entrance Visualizer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0f1a;
+      color: #e0e8f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #66d9ff;
+      text-align: center;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      max-width: 1320px;
+      width: 100%;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: #1a2332;
+      border-radius: 8px;
+      border: 2px solid #2a3f5f;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-family: 'Courier New', monospace;
+      background: #2a3f5f;
+      color: #e0e8f0;
+      border: 2px solid #66d9ff;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    button:hover:not(:disabled) {
+      background: #3a5f8f;
+      border-color: #ff3366;
+      transform: translateY(-2px);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    input[type="file"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .file-input-label {
+      display: inline-block;
+      padding: 12px 24px;
+      font-size: 16px;
+      background: #2a3f5f;
+      color: #e0e8f0;
+      border: 2px solid #ffcc00;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .file-input-label:hover {
+      background: #3a5f8f;
+      border-color: #ff3366;
+    }
+
+    canvas {
+      border: 3px solid #2a3f5f;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      background: #0a0f1a;
+    }
+
+    .info {
+      text-align: center;
+      padding: 15px;
+      background: #1a2332;
+      border-radius: 8px;
+      border: 2px solid #2a3f5f;
+      max-width: 800px;
+    }
+
+    .info p {
+      margin: 8px 0;
+      line-height: 1.6;
+    }
+
+    .highlight {
+      color: #66d9ff;
+      font-weight: bold;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+
+    .recording {
+      animation: pulse 1.5s infinite;
+      border-color: #ff3366 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Day 01: Secret Entrance - Safe Dial Visualizer</h1>
+    
+    <div class="info">
+      <p>This visualizer shows a circular safe dial being rotated according to instructions.</p>
+      <p>Watch as the dial passes through and lands on <span class="highlight">position 0</span>, accumulating the password.</p>
+      <p><strong>Load a JSON log file to begin.</strong></p>
+    </div>
+
+    <div class="controls">
+      <div class="file-input-wrapper">
+        <input type="file" id="fileInput" accept=".json">
+        <label class="file-input-label" for="fileInput">📁 Load JSON Log</label>
+      </div>
+      <label for="speedSelect" style="color: #e0e8f0; font-family: 'Courier New', monospace;">⏩ Speed</label>
+      <select id="speedSelect" style="padding: 12px; font-family: 'Courier New', monospace; background: #1a2332; color: #e0e8f0; border: 2px solid #66d9ff; border-radius: 4px;">
+        <option value="1">1x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2" selected>2x</option>
+        <option value="3">3x</option>
+        <option value="4">4x</option>
+      </select>
+      <button id="startBtn" disabled>▶ Play</button>
+      <button id="recordBtn" disabled>⏺ Record WebM</button>
+      <button id="stopBtn" disabled>⏹ Stop</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="info">
+      <p><strong>Controls:</strong></p>
+      <p><span class="highlight">Play</span> - Start the animation</p>
+      <p><span class="highlight">Record WebM</span> - Start animation and record to video file</p>
+      <p><span class="highlight">Stop</span> - Stop animation and save recording (if active)</p>
+    </div>
+  </div>
+
+  <script src="day01-visualizer.js"></script>
+</body>
+</html>

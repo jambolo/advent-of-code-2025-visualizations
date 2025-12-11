@@ -11,17 +11,17 @@ You must not write or modify any Rust code.
 ────────────────
 INPUTS PROVIDED
 ────────────────
-• puzzle_description.txt  
-• input.txt (the actual puzzle input)  
-• src/main.rs (the completed solver)  
-• solver_result.txt (final output of solver on input.txt)  
-• Visualization constraints (browser-only, ≤5-minute animation, WebM recording)
+
+• dayNN-description.txt (The puzzle description. The description contains two parts. Part 1 contains information relevant to part 2, but only part 2 is visualized. The description also contains the final result of the puzzle.)
+• dayNN-input.txt (puzzle input)
+• main.rs (the completed solver, written in Rust)  
 
 Your analysis, design, application, and schema must all be puzzle-specific.
 
 ────────────────
-STEP 1 — DESIGN DOCS (markdown)
+STEP 1 — DESIGN DOCS
 ────────────────
+
 Produce three markdown files. These are **your internal design documents** that **must guide your implementation in Step 2**.
 
 input_summary.md  
@@ -47,6 +47,7 @@ emission_rules.md
 ────────────────
 STEP 2 — VISUALIZER APP (code output + one prose file)
 ────────────────
+
 Use the markdown files from Step 1 as **authoritative design guidance**.
 
 Produce:
@@ -60,13 +61,15 @@ A) The **full visualizer application** (TypeScript + minimal HTML/CSS).
    • Use requestAnimationFrame or timers for playback.  
    • Use canvas.captureStream + MediaRecorder for WebM output.  
    • Highlight or show the solver_result.txt meaningfully.
+   • The name of the file containing the typescript code should be `dayNN-visualizer.ts`, where NN is the two-digit day of the puzzle.
 
-B) visualizer_annotation.md (markdown, **no code**)  
-   • Document architecture, how Step-1 docs guided your design, resolution choice, rendering logic, and recording workflow.
+B) visualizer_annotation.md  
+   • Document architecture, how Step-1 docs guided your design, resolution choice, rendering logic, and recording workflow in markdown format.
 
 ────────────────
 STEP 3 — JSON SCHEMA (markdown)
 ────────────────
+
 Produce json_log_spec.md describing the exact JSON contract the solver must emit.
 
 Requirements:  
