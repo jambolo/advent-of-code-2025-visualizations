@@ -25,7 +25,7 @@ No new fields, semantics, or behaviors may be invented beyond these documents.
 1. The application must collect instrumentation data in memory throughout execution.
 2. All instrumentation state must reside in a single central struct declared inside a dedicated `instrumentation` module.
 3. A single instance of this struct is created and owned in the `main` function.
-4. At program termination, this instance must be serialized to JSON using `serde_json` and written to stdout using `println!` as a single JSON object.
+4. At program termination, this instance must be serialized to JSON using `serde_json` and written to stdout using `println!` as a single JSON object. When the `instrumented` feature is enabled, the program must output **only** the JSON data to stdout—no other text, headers, labels, or diagnostic messages may be printed.
 5. When the `instrumented` feature is disabled:
 
    * No instrumentation code is compiled or executed.
@@ -50,17 +50,25 @@ Any code not explicitly excluded from Part 2 is considered part of Part 2 and mu
 * Do not alter public APIs unless absolutely necessary.
 * Do not significantly modify comments.
 
+### **State isolation**
+
+* All state variables used exclusively for instrumentation must reside inside the `Instrumentation` struct.
+* State changes must occur only through methods implemented on the struct.
+* Minimize instrumentation intrusion in the main application logic—keep call sites as simple as possible.
+* Pass raw values to instrumentation methods; let the struct compute derived state internally.
+
 ### **Instrumentation module**
 
 * A module named `instrumentation` must be placed at the **end of the existing Rust source file**. It must never be placed in a separate file.
 * The module must contain:
 
-  * The single central data struct representing the entire JSON output.
+  * A single output data struct representing the entire JSON output.
+  * The single central data struct holding the state maintained by the instrumentation module as well as the JSON output struct.
   * All logic for collecting and updating instrumentation data.
   * A finalize and print function that outputs the JSON log.
 * Only minimal helper functions and data structures may be publicly exposed.
 
-### **Single data struct**
+### **Single output data struct**
 
 * This struct must encode the exact JSON structure defined in `json_log_spec.md`.
 * All state mutations must occur through helper functions in the instrumentation module.
