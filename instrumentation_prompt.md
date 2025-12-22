@@ -44,11 +44,18 @@ Any code not explicitly excluded from Part 2 is considered part of Part 2 and mu
 
 ## **Coding and design constraints**
 
+### **Core priorities (in order)**
+
+1. **No code duplication.** Never duplicate functions or logic to add instrumentation. The same function must serve both instrumented and non-instrumented builds.
+2. **No structural changes.** Preserve the original control flow, function signatures, and code organization. Add instrumentation calls inline, not by restructuring.
+3. **No local tracking variables.** Do not introduce local variables in application code to track progress, counts, or state for instrumentation. All such state belongs inside the `Instrumentation` struct and is updated by calling its methods.
+
 ### **Minimal intrusion**
 
 * Do not rename or restructure existing code unless strictly required.
 * Do not alter public APIs unless absolutely necessary.
 * Do not significantly modify comments.
+* Do not create separate instrumented vs non-instrumented versions of functions. Use `#[cfg(feature = "instrumented")]` on individual statements within functions instead.
 
 ### **State isolation**
 
@@ -56,6 +63,7 @@ Any code not explicitly excluded from Part 2 is considered part of Part 2 and mu
 * State changes must occur only through methods implemented on the struct.
 * Minimize instrumentation intrusion in the main application logic—keep call sites as simple as possible.
 * Pass raw values to instrumentation methods; let the struct compute derived state internally.
+* The `Instrumentation` struct should own any counters, accumulators, or collections needed for tracking. Application code should only call methods like `inst.record_removal(x, y)` or `inst.end_pass(&grid)`, never maintain its own `removed_this_pass` vector or `pass_number` counter.
 
 ### **Instrumentation module**
 
@@ -124,6 +132,10 @@ Any code not explicitly excluded from Part 2 is considered part of Part 2 and mu
 
 5. Add minimal instrumentation calls inside Part 2 code paths. All must be gated with the `instrumented` feature.
 
+   * Insert `#[cfg(feature = "instrumented")]` calls at key points within existing functions.
+   * Do NOT duplicate functions. A function like `part2()` should have one definition with conditional instrumentation calls inside it.
+   * Pass `&mut Instrumentation` as an additional parameter when `instrumented` is enabled. Use a macro or conditional compilation to handle the signature difference if needed.
+
 6. Ensure the main function:
 
    * Creates the instrumentation state instance when instrumented.
@@ -141,3 +153,70 @@ Any code not explicitly excluded from Part 2 is considered part of Part 2 and mu
 * No placeholder code or fabricated fields allowed.
 * All behavior must derive solely from the two specification documents.
 * Any ambiguity must be resolved through clarification before writing instrumentation code.
+
+---
+
+## **Anti-patterns to avoid**
+
+The following patterns violate the core priorities and must not be used:
+
+### ❌ Duplicating functions
+
+```rust
+// WRONG: Two separate function definitions
+#[cfg(feature = "instrumented")]
+fn part2(map: &[Vec<char>], inst: &mut Instrumentation) { ... }
+
+#[cfg(not(feature = "instrumented"))]
+fn part2(map: &[Vec<char>]) { ... }
+```
+
+### ❌ Adding local tracking variables
+
+```rust
+// WRONG: Local variable for instrumentation tracking
+let mut removed_this_pass = Vec::new();
+for y in 0..height {
+    for x in 0..width {
+        if should_remove {
+            removed_this_pass.push((x, y));
+        }
+    }
+}
+inst.emit_pass(&removed_this_pass);
+```
+
+### ✅ Correct pattern
+
+```rust
+// RIGHT: Single function with inline conditional calls
+fn part2(map: &[Vec<char>], #[cfg(feature = "instrumented")] inst: &mut Instrumentation) {
+    #[cfg(feature = "instrumented")]
+    inst.begin(&map);
+
+    loop {
+        #[cfg(feature = "instrumented")]
+        inst.begin_pass();
+
+        for y in 0..height {
+            for x in 0..width {
+                if should_remove {
+                    new_map[y][x] = '.';
+                    #[cfg(feature = "instrumented")]
+                    inst.record_removal(x, y);
+                }
+            }
+        }
+
+        #[cfg(feature = "instrumented")]
+        inst.end_pass(&new_map);
+
+        if no_changes { break; }
+    }
+
+    #[cfg(feature = "instrumented")]
+    inst.finalize(&new_map);
+}
+```
+
+The `Instrumentation` struct internally tracks pass numbers, removal counts, and accumulates removed positions per pass.
