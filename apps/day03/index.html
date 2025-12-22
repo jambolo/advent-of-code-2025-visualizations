@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 03 — Lobby Battery Banks</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Trebuchet MS', 'Futura', 'Gill Sans', sans-serif;
+      background: radial-gradient(circle at 20% 20%, #102f3a, #07161d 55%);
+      color: #f1e9da;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 1400px;
+      background: linear-gradient(160deg, #0b1f27, #0c1218 70%);
+      border: 2px solid #1f4d5a;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 0 60px rgba(18, 62, 76, 0.4);
+      padding: 22px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 26px;
+      letter-spacing: 0.5px;
+      color: #f7d96f;
+      text-shadow: 0 4px 10px rgba(247, 217, 111, 0.35);
+    }
+
+    .badge {
+      padding: 8px 14px;
+      background: linear-gradient(120deg, #1d4e5c, #143742);
+      border: 1px solid #2dd4bf;
+      border-radius: 12px;
+      color: #9ad7d1;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .panel {
+      background: linear-gradient(140deg, rgba(31, 77, 90, 0.18), rgba(10, 30, 36, 0.8));
+      border: 1px solid #1f4d5a;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: inset 0 0 12px rgba(14, 41, 51, 0.5);
+    }
+
+    label {
+      display: block;
+      color: #9fbcc5;
+      font-size: 13px;
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px dashed #2dd4bf;
+      background: rgba(19, 40, 46, 0.6);
+      color: #f1e9da;
+      cursor: pointer;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #1f4d5a;
+      background: linear-gradient(135deg, #12323f, #0b1f27);
+      color: #f1e9da;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+
+    select:focus, button:focus, input[type="file"]:focus {
+      outline: none;
+      border-color: #2dd4bf;
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.25);
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.4);
+      border-color: #f7d96f;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .primary {
+      background: linear-gradient(130deg, #ff6f61, #d8546f);
+      border-color: #f7d96f;
+      color: #0c1218;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    canvas {
+      width: 100%;
+      border-radius: 14px;
+      border: 2px solid #1f4d5a;
+      background: radial-gradient(circle at 60% 10%, rgba(247, 217, 111, 0.08), rgba(12, 30, 36, 0.9));
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.4), 0 18px 42px rgba(0, 0, 0, 0.5);
+    }
+
+    .info {
+      margin-top: 14px;
+      color: #9fbcc5;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .info strong {
+      color: #f7d96f;
+    }
+
+    /* Description dialog styles */
+    dialog {
+      background: linear-gradient(160deg, #0b1f27, #0c1218 70%);
+      border: 2px solid #2dd4bf;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 60px rgba(18, 62, 76, 0.4);
+      color: #f1e9da;
+      max-width: 700px;
+      max-height: 80vh;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    dialog::backdrop {
+      background: rgba(7, 22, 29, 0.85);
+      backdrop-filter: blur(4px);
+    }
+
+    .dialog-content {
+      padding: 24px 28px;
+      overflow-y: auto;
+      max-height: calc(80vh - 60px);
+    }
+
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: linear-gradient(120deg, #1d4e5c, #143742);
+      border-bottom: 1px solid #2dd4bf;
+    }
+
+    .dialog-header h2 {
+      font-size: 20px;
+      color: #f7d96f;
+      margin: 0;
+    }
+
+    .dialog-close {
+      background: transparent;
+      border: 1px solid #9fbcc5;
+      border-radius: 8px;
+      color: #9fbcc5;
+      padding: 6px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      width: auto;
+    }
+
+    .dialog-close:hover {
+      background: rgba(255, 111, 97, 0.2);
+      border-color: #ff6f61;
+      color: #ff6f61;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .description-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #d0e0e6;
+    }
+
+    .description-text p {
+      margin-bottom: 14px;
+    }
+
+    .description-text code {
+      background: rgba(45, 212, 191, 0.15);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      color: #2dd4bf;
+    }
+
+    .description-text pre {
+      background: rgba(12, 30, 36, 0.8);
+      border: 1px solid #1f4d5a;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 14px 0;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      color: #9fbcc5;
+    }
+
+    .description-text ul,
+    .description-text ol {
+      margin: 12px 0 12px 24px;
+    }
+
+    .description-text li {
+      margin-bottom: 8px;
+    }
+
+    .description-text ol {
+      list-style-type: decimal;
+    }
+
+    .description-text strong, .description-text em {
+      color: #f7d96f;
+    }
+
+    .part-header {
+      font-size: 16px;
+      color: #ff6f61;
+      margin: 20px 0 12px 0;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 111, 97, 0.3);
+    }
+
+    .answer {
+      background: linear-gradient(120deg, rgba(247, 217, 111, 0.1), rgba(216, 162, 74, 0.1));
+      border: 1px solid #d8a24a;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-top: 12px;
+      color: #f7d96f;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <h1>Day 03: Lobby Battery Banks</h1>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button id="descriptionBtn" class="badge" style="cursor: pointer; border: none; font-size: 14px;">? Description</button>
+        <button id="howItWorksBtn" class="badge" style="cursor: pointer; border: none; font-size: 14px;">? How It Works</button>
+        <div class="badge">Part 2 — Twelve Battery Picks</div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="panel">
+        <label for="fileInput">Load JSON log</label>
+        <input type="file" id="fileInput" accept=".json">
+      </div>
+      <div class="panel">
+        <label for="speedSelect">Playback speed</label>
+        <select id="speedSelect">
+          <option value="0.5">0.5×</option>
+          <option value="0.75">0.75×</option>
+          <option value="1">1×</option>
+          <option value="1.5">1.5×</option>
+          <option value="2" selected>2×</option>
+          <option value="3">3×</option>
+          <option value="4">4×</option>
+          <option value="5">5×</option>
+        </select>
+      </div>
+      <div class="panel">
+        <label>Playback</label>
+        <button id="startBtn" class="primary" disabled>▶ Play from start</button>
+      </div>
+      <div class="panel">
+        <label>Record</label>
+        <button id="recordBtn" disabled>⏺ Record WebM</button>
+      </div>
+      <div class="panel">
+        <label>Stop</label>
+        <button id="stopBtn" disabled>⏹ Stop</button>
+      </div>
+    </div>
+
+    <canvas id="canvas" width="1280" height="720"></canvas>
+
+    <p class="info">
+      Load a JSON log emitted by the solver to see each battery bank scanned. The jade band shows the lookahead window; coral sparks mark chosen batteries rising into the power rail. Every completed bank sends a pulse up the escalator spine until the total joltage lights the lobby.
+    </p>
+  </div>
+
+  <!-- Puzzle Description Dialog -->
+  <dialog id="descriptionDialog">
+    <div class="dialog-header">
+      <h2>Day 3: Lobby</h2>
+      <button class="dialog-close" id="closeDialogBtn">Close</button>
+    </div>
+    <div class="dialog-content">
+      <div class="description-text">
+        <p>You descend a short staircase, enter the surprisingly vast lobby, and are quickly cleared by the security checkpoint. When you get to the main elevators, however, you discover that each one has a red light above it: they're all offline.</p>
+
+        <p><em>"Sorry about that,"</em> an Elf apologizes as she tinkers with a nearby control panel. <em>"Some kind of electrical surge seems to have fried them. I'll try to get them online soon."</em></p>
+
+        <p>You explain your need to get further underground. <em>"Well, you could at least take the escalator down to the printing department, not that you'd get much further than that without the elevators working. That is, you could if the escalator weren't also offline."</em></p>
+
+        <p><em>"But, don't worry! It's not fried; it just needs power. Maybe you can get it running while I keep working on the elevators."</em></p>
+
+        <p>There are batteries nearby that can supply emergency power to the escalator for just such an occasion. The batteries are each labeled with their <strong>joltage rating</strong>, a value from 1 to 9. You make a note of their joltage ratings (your puzzle input). For example:</p>
+
+        <pre>987654321111111
+811111111111119
+234234234234278
+818181911112111</pre>
+
+        <p>The batteries are arranged into <strong>banks</strong>; each line of digits in your input corresponds to a single bank of batteries. Within each bank, you need to turn on exactly two batteries; the joltage that the bank produces is equal to the number formed by the digits on the batteries you've turned on. For example, if you have a bank like <code>12345</code> and you turn on batteries 2 and 4, the bank would produce <strong>24 jolts</strong>. (You cannot rearrange batteries.)</p>
+
+        <p>You'll need to find the largest possible joltage each bank can produce. In the above example:</p>
+
+        <ul>
+          <li>In <code>987654321111111</code>, you can make the largest joltage possible, <strong>98</strong>, by turning on the first two batteries.</li>
+          <li>In <code>811111111111119</code>, you can make the largest joltage possible by turning on the batteries labeled 8 and 9, producing <strong>89 jolts</strong>.</li>
+          <li>In <code>234234234234278</code>, you can make <strong>78</strong> by turning on the last two batteries (marked 7 and 8).</li>
+          <li>In <code>818181911112111</code>, the largest joltage you can produce is <strong>92</strong>.</li>
+        </ul>
+
+        <p>The total output joltage is the sum of the maximum joltage from each bank, so in this example, the total output joltage is <strong>98 + 89 + 78 + 92 = 357</strong>.</p>
+
+        <p>There are many batteries in front of you. Find the maximum joltage possible from each bank; <strong>what is the total output joltage?</strong></p>
+
+        <div class="answer">Part 1 Answer: 16854</div>
+
+        <h3 class="part-header">Part Two</h3>
+
+        <p>The escalator doesn't move. The Elf explains that it probably needs more joltage to overcome the static friction of the system and hits the big red "joltage limit safety override" button. You lose count of the number of times she needs to confirm "yes, I'm sure" and decorate the lobby a bit while you wait.</p>
+
+        <p>Now, you need to make the largest joltage by turning on exactly <strong>twelve batteries</strong> within each bank.</p>
+
+        <p>The joltage output for the bank is still the number formed by the digits of the batteries you've turned on; the only difference is that now there will be 12 digits in each bank's joltage output instead of two.</p>
+
+        <p>Consider again the example from before:</p>
+
+        <pre>987654321111111
+811111111111119
+234234234234278
+818181911112111</pre>
+
+        <p>Now, the joltages are much larger:</p>
+
+        <ul>
+          <li>In <code>987654321111111</code>, the largest joltage can be found by turning on everything except some 1s at the end to produce <strong>987654321111</strong>.</li>
+          <li>In the digit sequence <code>811111111111119</code>, the largest joltage can be found by turning on everything except some 1s, producing <strong>811111111119</strong>.</li>
+          <li>In <code>234234234234278</code>, the largest joltage can be found by turning on everything except a 2 battery, a 3 battery, and another 2 battery near the start to produce <strong>434234234278</strong>.</li>
+          <li>In <code>818181911112111</code>, the joltage <strong>888911112111</strong> is produced by turning on everything except some 1s near the front.</li>
+        </ul>
+
+        <p>The total output joltage is now much larger: <strong>987654321111 + 811111111119 + 434234234278 + 888911112111 = 3121910778619</strong>.</p>
+
+        <p><strong>What is the new total output joltage?</strong></p>
+
+        <div class="answer">Part 2 Answer: 167526011932478</div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- How It Works Dialog -->
+  <dialog id="howItWorksDialog">
+    <div class="dialog-header">
+      <h2>How the Solver Works</h2>
+      <button class="dialog-close" id="closeHowItWorksBtn">Close</button>
+    </div>
+    <div class="dialog-content">
+      <div class="description-text">
+        <p>The solver uses a <strong>greedy algorithm</strong> to find the largest possible number by selecting exactly <em>k</em> digits from each bank (k=2 for Part 1, k=12 for Part 2).</p>
+
+        <h3 class="part-header">The Greedy Strategy</h3>
+
+        <p>To build the largest number, we want the <strong>leftmost digit to be as large as possible</strong>, then the second digit, and so on. The key insight is that we can't just pick the largest digits anywhere—we must maintain their relative order.</p>
+
+        <p>For each position in our output number:</p>
+
+        <ol>
+          <li><strong>Calculate the lookahead window:</strong> We need to leave enough digits remaining to fill the rest of our output. If we have <em>n</em> digits left to pick, we can only look at positions up to <code>length - n + 1</code>.</li>
+          <li><strong>Find the maximum digit</strong> within this window.</li>
+          <li><strong>Pick that digit</strong> and advance past it.</li>
+          <li><strong>Repeat</strong> until all digits are selected.</li>
+        </ol>
+
+        <h3 class="part-header">Example Walkthrough</h3>
+
+        <p>For the bank <code>234234234234278</code> picking 12 digits:</p>
+
+        <ul>
+          <li>First pick: Window covers positions 0–3. Maximum is <strong>4</strong> at position 2.</li>
+          <li>Second pick: Window starts at position 3. Maximum is <strong>3</strong> at position 3.</li>
+          <li>Continue until 12 digits are selected: <strong>434234234278</strong></li>
+        </ul>
+
+        <h3 class="part-header">What the Visualization Shows</h3>
+
+        <ul>
+          <li><strong>Jade band:</strong> The current lookahead window where the algorithm is searching.</li>
+          <li><strong>Coral triangle:</strong> The cursor position being evaluated.</li>
+          <li><strong>Gold cells:</strong> Already-selected (locked) digits.</li>
+          <li><strong>Power rail:</strong> The output number being constructed.</li>
+          <li><strong>Escalator:</strong> Overall progress through all banks.</li>
+        </ul>
+
+        <h3 class="part-header">Why This Works</h3>
+
+        <p>The greedy approach is optimal because choosing a larger digit earlier always produces a larger number than any arrangement with a smaller digit in that position, regardless of subsequent choices.</p>
+      </div>
+    </div>
+  </dialog>
+
+  <script type="module" src="day03-visualizer.js"></script>
+</body>
+</html>
