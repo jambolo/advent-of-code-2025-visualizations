@@ -70,6 +70,8 @@ Produce:
 Detect supported MIME types using `MediaRecorder.isTypeSupported` (try vp9 → vp8 → generic WebM) and fall back gracefully.
 • Highlight the puzzle’s final result using a thematic, visually expressive cue.
 • Display the puzzle name and day number prominently.
+• Include a pop-up window that shows the puzzle description. Include the description text verbatim, but format it to improve its readability.
+• Include a pop-up window with a summary of how the code finds the solution.
 • Include playback-speed control (0.5×–5×).
 • The TypeScript file must be named `dayNN-visualizer.ts`.
 
