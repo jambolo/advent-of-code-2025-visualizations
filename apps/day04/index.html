@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 04 — Printing Department</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Trebuchet MS', 'Futura', 'Gill Sans', sans-serif;
+      background: radial-gradient(circle at 30% 30%, #2a2218, #1a1410 60%);
+      color: #f5e6d3;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 1400px;
+      background: linear-gradient(160deg, #2a2218, #1a1410 70%);
+      border: 2px solid #5a4a38;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 0 60px rgba(90, 74, 56, 0.2);
+      padding: 22px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 26px;
+      letter-spacing: 0.5px;
+      color: #ff9f43;
+      text-shadow: 0 4px 10px rgba(255, 159, 67, 0.35);
+    }
+
+    .badge {
+      padding: 8px 14px;
+      background: linear-gradient(120deg, #3d3225, #2a2218);
+      border: 1px solid #8b7355;
+      border-radius: 12px;
+      color: #c4b5a3;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .panel {
+      background: linear-gradient(140deg, rgba(90, 74, 56, 0.18), rgba(26, 20, 16, 0.8));
+      border: 1px solid #5a4a38;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: inset 0 0 12px rgba(42, 34, 24, 0.5);
+    }
+
+    label {
+      display: block;
+      color: #9a8b7a;
+      font-size: 13px;
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px dashed #8b7355;
+      background: rgba(42, 34, 24, 0.6);
+      color: #f5e6d3;
+      cursor: pointer;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #5a4a38;
+      background: linear-gradient(135deg, #3d3225, #2a2218);
+      color: #f5e6d3;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+
+    select:focus, button:focus, input[type="file"]:focus {
+      outline: none;
+      border-color: #ff9f43;
+      box-shadow: 0 0 0 3px rgba(255, 159, 67, 0.25);
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.4);
+      border-color: #ff9f43;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .primary {
+      background: linear-gradient(130deg, #e74c3c, #c0392b);
+      border-color: #ff9f43;
+      color: #fff;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    canvas {
+      width: 100%;
+      border-radius: 14px;
+      border: 2px solid #5a4a38;
+      background: radial-gradient(circle at 50% 30%, rgba(255, 159, 67, 0.06), rgba(26, 20, 16, 0.95));
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.4), 0 18px 42px rgba(0, 0, 0, 0.5);
+    }
+
+    .info {
+      margin-top: 14px;
+      color: #9a8b7a;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .info strong {
+      color: #ff9f43;
+    }
+
+    /* Dialog styles */
+    dialog {
+      background: linear-gradient(160deg, #2a2218, #1a1410 70%);
+      border: 2px solid #8b7355;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 60px rgba(90, 74, 56, 0.2);
+      color: #f5e6d3;
+      max-width: 700px;
+      max-height: 80vh;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    dialog::backdrop {
+      background: rgba(26, 20, 16, 0.85);
+      backdrop-filter: blur(4px);
+    }
+
+    .dialog-content {
+      padding: 24px 28px;
+      overflow-y: auto;
+      max-height: calc(80vh - 60px);
+    }
+
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: linear-gradient(120deg, #3d3225, #2a2218);
+      border-bottom: 1px solid #8b7355;
+    }
+
+    .dialog-header h2 {
+      font-size: 20px;
+      color: #ff9f43;
+      margin: 0;
+    }
+
+    .dialog-close {
+      background: transparent;
+      border: 1px solid #9a8b7a;
+      border-radius: 8px;
+      color: #9a8b7a;
+      padding: 6px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      width: auto;
+    }
+
+    .dialog-close:hover {
+      background: rgba(231, 76, 60, 0.2);
+      border-color: #e74c3c;
+      color: #e74c3c;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .description-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #c4b5a3;
+    }
+
+    .description-text p {
+      margin-bottom: 14px;
+    }
+
+    .description-text code {
+      background: rgba(255, 159, 67, 0.15);
+      border: 1px solid rgba(255, 159, 67, 0.3);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      color: #ff9f43;
+    }
+
+    .description-text pre {
+      background: rgba(26, 20, 16, 0.8);
+      border: 1px solid #5a4a38;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 14px 0;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      color: #9a8b7a;
+    }
+
+    .description-text ul,
+    .description-text ol {
+      margin: 12px 0 12px 24px;
+    }
+
+    .description-text li {
+      margin-bottom: 8px;
+    }
+
+    .description-text strong, .description-text em {
+      color: #ff9f43;
+    }
+
+    .part-header {
+      font-size: 16px;
+      color: #e74c3c;
+      margin: 20px 0 12px 0;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(231, 76, 60, 0.3);
+    }
+
+    .answer {
+      background: linear-gradient(120deg, rgba(255, 159, 67, 0.1), rgba(139, 115, 85, 0.1));
+      border: 1px solid #8b7355;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-top: 12px;
+      color: #ff9f43;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <h1>Day 04: Printing Department</h1>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button id="descriptionBtn" class="badge" style="cursor: pointer; border: none; font-size: 14px;">? Description</button>
+        <button id="howItWorksBtn" class="badge" style="cursor: pointer; border: none; font-size: 14px;">? How It Works</button>
+        <div class="badge">Part 2 — Forklift Erosion</div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="panel">
+        <label for="fileInput">Load JSON log</label>
+        <input type="file" id="fileInput" accept=".json">
+      </div>
+      <div class="panel">
+        <label for="speedSelect">Playback speed</label>
+        <select id="speedSelect">
+          <option value="0.5">0.5x</option>
+          <option value="0.75">0.75x</option>
+          <option value="1">1x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2" selected>2x</option>
+          <option value="3">3x</option>
+          <option value="4">4x</option>
+          <option value="5">5x</option>
+        </select>
+      </div>
+      <div class="panel">
+        <label>Playback</label>
+        <button id="startBtn" class="primary" disabled>Play from start</button>
+      </div>
+      <div class="panel">
+        <label>Record</label>
+        <button id="recordBtn" disabled>Record WebM</button>
+      </div>
+      <div class="panel">
+        <label>Stop</label>
+        <button id="stopBtn" disabled>Stop</button>
+      </div>
+    </div>
+
+    <canvas id="canvas" width="1280" height="720"></canvas>
+
+    <p class="info">
+      Load a JSON log emitted by the solver to watch the warehouse erosion. Each pass removes paper rolls (<strong>@</strong>) that have fewer than 4 neighbors, revealing the stable core that forklifts cannot reach. Watch the edges dissolve inward as <strong>8,890</strong> rolls are cleared.
+    </p>
+  </div>
+
+  <!-- Puzzle Description Dialog -->
+  <dialog id="descriptionDialog">
+    <div class="dialog-header">
+      <h2>Day 4: Printing Department</h2>
+      <button class="dialog-close" id="closeDialogBtn">Close</button>
+    </div>
+    <div class="dialog-content">
+      <div class="description-text">
+        <p>You ride the escalator down to the printing department. They're clearly getting ready for Christmas; they have lots of large rolls of paper everywhere, and there's even a massive printer in the corner (to handle the really big print jobs).</p>
+
+        <p>Decorating here will be easy: they can make their own decorations. What you really need is a way to get further into the North Pole base while the elevators are offline.</p>
+
+        <p><em>"Actually, maybe we can help with that,"</em> one of the Elves replies when you ask for help. <em>"We're pretty sure there's a cafeteria on the other side of the back wall. If we could break through the wall, you'd be able to keep moving. It's too bad all of our forklifts are so busy moving those big rolls of paper around."</em></p>
+
+        <p>If you can optimize the work the forklifts are doing, maybe they would have time to spare to break through the wall.</p>
+
+        <p>The rolls of paper (<code>@</code>) are arranged on a large grid; the Elves even have a helpful diagram (your puzzle input) indicating where everything is located.</p>
+
+        <p>For example:</p>
+
+        <pre>..@@.@@@@.
+@@@.@.@.@@
+@@@@@.@.@@
+@.@@@@..@.
+@@.@@@@.@@
+.@@@@@@@.@
+.@.@.@.@@@
+@.@@@.@@@@
+.@@@@@@@@.
+@.@.@@@.@.</pre>
+
+        <p>The forklifts can only access a roll of paper if there are <strong>fewer than four rolls of paper</strong> in the eight adjacent positions. If you can figure out which rolls of paper the forklifts can access, they'll spend less time looking and more time breaking down the wall to the cafeteria.</p>
+
+        <p>In this example, there are <strong>13</strong> rolls of paper that can be accessed by a forklift (marked with x):</p>
+
+        <pre>..xx.xx@x.
+x@@.@.@.@@
+@@@@@.x.@@
+@.@@@@..@.
+x@.@@@@.@x
+.@@@@@@@.@
+.@.@.@.@@@
+x.@@@.@@@@
+.@@@@@@@@.
+x.x.@@@.x.</pre>
+
+        <p>Consider your complete diagram of the paper roll locations. <strong>How many rolls of paper can be accessed by a forklift?</strong></p>
+
+        <div class="answer">Part 1 Answer: 1489</div>
+
+        <h3 class="part-header">Part Two</h3>
+
+        <p>Now, the Elves just need help accessing as much of the paper as they can.</p>
+
+        <p>Once a roll of paper can be accessed by a forklift, it can be removed. Once a roll of paper is removed, the forklifts might be able to access more rolls of paper, which they might also be able to remove. <strong>How many total rolls of paper could the Elves remove if they keep repeating this process?</strong></p>
+
+        <p>Starting with the same example as above, here is one way you could remove as many rolls of paper as possible:</p>
+
+        <ul>
+          <li>Remove 13 rolls (the initially accessible ones)</li>
+          <li>Remove 12 more rolls (now exposed)</li>
+          <li>Remove 7 more rolls</li>
+          <li>Continue until no more are accessible...</li>
+        </ul>
+
+        <p>Stop once no more rolls of paper are accessible by a forklift. In this example, a total of <strong>43</strong> rolls of paper can be removed.</p>
+
+        <p>Start with your original diagram. <strong>How many rolls of paper in total can be removed by the Elves and their forklifts?</strong></p>
+
+        <div class="answer">Part 2 Answer: 8890</div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- How It Works Dialog -->
+  <dialog id="howItWorksDialog">
+    <div class="dialog-header">
+      <h2>How the Solver Works</h2>
+      <button class="dialog-close" id="closeHowItWorksBtn">Close</button>
+    </div>
+    <div class="dialog-content">
+      <div class="description-text">
+        <p>The solver uses an <strong>iterative erosion algorithm</strong> to progressively remove accessible paper rolls from the grid.</p>
+
+        <h3 class="part-header">The Erosion Process</h3>
+
+        <p>Each pass through the grid:</p>
+
+        <ol>
+          <li><strong>Scan all cells</strong> containing a paper roll (<code>@</code>).</li>
+          <li><strong>Count neighbors</strong> in the 8 adjacent positions (including diagonals).</li>
+          <li><strong>Mark for removal</strong> any roll with fewer than 4 neighbors.</li>
+          <li><strong>Remove all marked rolls</strong> simultaneously.</li>
+          <li><strong>Repeat</strong> until no rolls are removed in a pass.</li>
+        </ol>
+
+        <h3 class="part-header">Why Simultaneous Removal?</h3>
+
+        <p>All removals in a pass happen at once. This prevents the order of scanning from affecting which rolls are removed. A roll's accessibility is determined by the state at the <em>start</em> of each pass.</p>
+
+        <h3 class="part-header">What the Visualization Shows</h3>
+
+        <ul>
+          <li><strong>Cream circles:</strong> Paper rolls still on the grid.</li>
+          <li><strong>Orange glow:</strong> Rolls being removed this pass.</li>
+          <li><strong>Dark floor:</strong> Empty spaces where rolls were removed.</li>
+          <li><strong>Progress bar:</strong> Percentage of total removable rolls cleared.</li>
+          <li><strong>Pass counter:</strong> Current iteration of the erosion process.</li>
+        </ul>
+
+        <h3 class="part-header">The Stable Core</h3>
+
+        <p>Eventually, erosion stops. The remaining rolls form a <strong>stable core</strong> where every roll has at least 4 neighbors. These rolls are unreachable by forklifts and cannot be removed.</p>
+
+        <p>For the puzzle input, <strong>8,890</strong> rolls are removed, leaving the stable interior.</p>
+      </div>
+    </div>
+  </dialog>
+
+  <script type="module" src="day04-visualizer.js"></script>
+</body>
+</html>
