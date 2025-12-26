@@ -38,11 +38,11 @@ This repository creates browser-based visualizations for Advent of Code 2025 puz
 ## Commands
 
 ```bash
-npm run build        # Compile TypeScript and copy support files to dist/
-npm test             # Run Jest tests
-npm run test:coverage # Run tests with coverage
+pnpm run build        # Compile TypeScript and copy support files to dist/
+pnpm test             # Run Jest tests
+pnpm run test:coverage # Run tests with coverage
 npx cd ~/projects/advent-of-code-2025-visualizations && npx serve dist/apps/dayNN # Serve day NN (required to run from project root)
-npm build # Build the app and publish to dist folder
+pnpm build # Build the app and publish to dist folder
 ```
 
 ## Architecture
