@@ -40,6 +40,12 @@ No new fields, semantics, or behaviors may be invented beyond these documents.
 The application performs two operations on the same input and produces two distinct outcomes.
 Any code not explicitly excluded from Part 2 is considered part of Part 2 and must be instrumented as required by the emission rules.
 
+**Important:** Only Part 2 code is instrumented. When the `instrumented` feature is enabled, the `part2` feature must also be enabled. In `Cargo.toml`, define the feature as:
+
+```toml
+instrumented = ["part2", "serde", "serde_json"]
+```
+
 ---
 
 ## **Coding and design constraints**

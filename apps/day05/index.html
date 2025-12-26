@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 05 — Cafeteria</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Trebuchet MS', 'Futura', 'Gill Sans', sans-serif;
+      background: radial-gradient(circle at 30% 30%, #243028, #1a2420 60%);
+      color: #f0fdf4;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 1400px;
+      background: linear-gradient(160deg, #243028, #1a2420 70%);
+      border: 2px solid #4ade80;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 0 60px rgba(74, 222, 128, 0.1);
+      padding: 22px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 26px;
+      letter-spacing: 0.5px;
+      color: #4ade80;
+      text-shadow: 0 4px 10px rgba(74, 222, 128, 0.35);
+    }
+
+    .badge {
+      padding: 8px 14px;
+      background: linear-gradient(120deg, #1e3a2f, #243028);
+      border: 1px solid #22c55e;
+      border-radius: 12px;
+      color: #86efac;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .panel {
+      background: linear-gradient(140deg, rgba(74, 222, 128, 0.08), rgba(26, 36, 32, 0.8));
+      border: 1px solid #22c55e;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: inset 0 0 12px rgba(30, 58, 47, 0.5);
+    }
+
+    label {
+      display: block;
+      color: #86efac;
+      font-size: 13px;
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px dashed #22c55e;
+      background: rgba(30, 58, 47, 0.6);
+      color: #f0fdf4;
+      cursor: pointer;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #22c55e;
+      background: linear-gradient(135deg, #1e3a2f, #243028);
+      color: #f0fdf4;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+
+    select:focus, button:focus, input[type="file"]:focus {
+      outline: none;
+      border-color: #4ade80;
+      box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.25);
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.4);
+      border-color: #4ade80;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .primary {
+      background: linear-gradient(130deg, #22c55e, #16a34a);
+      border-color: #4ade80;
+      color: #fff;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    canvas {
+      width: 100%;
+      border-radius: 14px;
+      border: 2px solid #22c55e;
+      background: radial-gradient(circle at 50% 30%, rgba(74, 222, 128, 0.06), rgba(26, 36, 32, 0.95));
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.4), 0 18px 42px rgba(0, 0, 0, 0.5);
+    }
+
+    .info {
+      margin-top: 14px;
+      color: #86efac;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .info strong {
+      color: #4ade80;
+    }
+
+    /* Dialog styles */
+    dialog {
+      background: linear-gradient(160deg, #243028, #1a2420 70%);
+      border: 2px solid #22c55e;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 60px rgba(74, 222, 128, 0.1);
+      color: #f0fdf4;
+      max-width: 700px;
+      max-height: 80vh;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    dialog::backdrop {
+      background: rgba(26, 36, 32, 0.85);
+      backdrop-filter: blur(4px);
+    }
+
+    .dialog-content {
+      padding: 24px 28px;
+      overflow-y: auto;
+      max-height: calc(80vh - 60px);
+    }
+
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: linear-gradient(120deg, #1e3a2f, #243028);
+      border-bottom: 1px solid #22c55e;
+    }
+
+    .dialog-header h2 {
+      font-size: 20px;
+      color: #4ade80;
+      margin: 0;
+    }
+
+    .dialog-close {
+      background: transparent;
+      border: 1px solid #86efac;
+      border-radius: 8px;
+      color: #86efac;
+      padding: 6px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      width: auto;
+    }
+
+    .dialog-close:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #ef4444;
+      color: #ef4444;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .description-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #a7f3d0;
+    }
+
+    .description-text p {
+      margin-bottom: 14px;
+    }
+
+    .description-text code {
+      background: rgba(74, 222, 128, 0.15);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      color: #4ade80;
+    }
+
+    .description-text pre {
+      background: rgba(26, 36, 32, 0.8);
+      border: 1px solid #22c55e;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 14px 0;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      color: #86efac;
+    }
+
+    .description-text ul,
+    .description-text ol {
+      margin: 12px 0 12px 24px;
+    }
+
+    .description-text li {
+      margin-bottom: 8px;
+    }
+
+    .description-text strong, .description-text em {
+      color: #4ade80;
+    }
+
+    .part-header {
+      font-size: 16px;
+      color: #f97316;
+      margin: 20px 0 12px 0;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(249, 115, 22, 0.3);
+    }
+
+    .answer {
+      background: linear-gradient(120deg, rgba(74, 222, 128, 0.1), rgba(34, 197, 94, 0.1));
+      border: 1px solid #22c55e;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-top: 12px;
+      color: #4ade80;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <h1>Day 05: Cafeteria</h1>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button id="descriptionBtn" class="badge" style="cursor: pointer; border: none; font-size: 14px;">? Description</button>
+        <button id="howItWorksBtn" class="badge" style="cursor: pointer; border: none; font-size: 14px;">? How It Works</button>
+        <div class="badge">Part 2 — Range Merging</div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="panel">
+        <label for="fileInput">Load JSON log</label>
+        <input type="file" id="fileInput" accept=".json">
+      </div>
+      <div class="panel">
+        <label for="speedSelect">Playback speed</label>
+        <select id="speedSelect">
+          <option value="0.5">0.5x</option>
+          <option value="0.75">0.75x</option>
+          <option value="1">1x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2" selected>2x</option>
+          <option value="3">3x</option>
+          <option value="4">4x</option>
+          <option value="5">5x</option>
+        </select>
+      </div>
+      <div class="panel">
+        <label>Playback</label>
+        <button id="startBtn" class="primary" disabled>Play from start</button>
+      </div>
+      <div class="panel">
+        <label>Record</label>
+        <button id="recordBtn" disabled>Record WebM</button>
+      </div>
+      <div class="panel">
+        <label>Stop</label>
+        <button id="stopBtn" disabled>Stop</button>
+      </div>
+    </div>
+
+    <canvas id="canvas" width="1280" height="720"></canvas>
+
+    <p class="info">
+      Load a JSON log emitted by the solver to watch the range-merging algorithm. <strong>182</strong> fresh ingredient ranges are sorted and merged to find the total number of fresh IDs: <strong>353,716,783,056,994</strong>.
+    </p>
+  </div>
+
+  <!-- Puzzle Description Dialog -->
+  <dialog id="descriptionDialog">
+    <div class="dialog-header">
+      <h2>Day 5: Cafeteria</h2>
+      <button class="dialog-close" id="closeDialogBtn">Close</button>
+    </div>
+    <div class="dialog-content">
+      <div class="description-text">
+        <p>As the forklifts break through the wall, the Elves are delighted to discover that there was a cafeteria on the other side after all.</p>
+
+        <p>You can hear a commotion coming from the kitchen. <em>"At this rate, we won't have any time left to put the wreaths up in the dining hall!"</em> Resolute in your quest, you investigate.</p>
+
+        <p><em>"If only we hadn't switched to the new inventory management system right before Christmas!"</em> another Elf exclaims. You ask what's going on.</p>
+
+        <p>The Elves in the kitchen explain the situation: because of their complicated new inventory management system, they can't figure out which of their ingredients are fresh and which are spoiled. When you ask how it works, they give you a copy of their database (your puzzle input).</p>
+
+        <p>The database operates on ingredient IDs. It consists of a list of fresh ingredient ID ranges, a blank line, and a list of available ingredient IDs. For example:</p>
+
+        <pre>3-5
+10-14
+16-20
+12-18
+
+1
+5
+8
+11
+17
+32</pre>
+
+        <p>The fresh ID ranges are inclusive: the range <code>3-5</code> means that ingredient IDs 3, 4, and 5 are all fresh. The ranges can also overlap; an ingredient ID is fresh if it is in any range.</p>
+
+        <p>The Elves are trying to determine which of the available ingredient IDs are fresh. In this example:</p>
+
+        <ul>
+          <li>Ingredient ID 1 is spoiled because it does not fall into any range.</li>
+          <li>Ingredient ID 5 is <strong>fresh</strong> because it falls into range 3-5.</li>
+          <li>Ingredient ID 8 is spoiled.</li>
+          <li>Ingredient ID 11 is <strong>fresh</strong> because it falls into range 10-14.</li>
+          <li>Ingredient ID 17 is <strong>fresh</strong> because it falls into range 16-20 as well as range 12-18.</li>
+          <li>Ingredient ID 32 is spoiled.</li>
+        </ul>
+
+        <p>So, in this example, <strong>3</strong> of the available ingredient IDs are fresh.</p>
+
+        <div class="answer">Part 1 Answer: 615</div>
+
+        <h3 class="part-header">Part Two</h3>
+
+        <p>The Elves start bringing their spoiled inventory to the trash chute at the back of the kitchen.</p>
+
+        <p>So that they can stop bugging you when they get new inventory, the Elves would like to know <strong>all of the IDs</strong> that the fresh ingredient ID ranges consider to be fresh. An ingredient ID is still considered fresh if it is in any range.</p>
+
+        <p>Now, the second section of the database (the available ingredient IDs) is irrelevant. Here are the fresh ingredient ID ranges from the above example:</p>
+
+        <pre>3-5
+10-14
+16-20
+12-18</pre>
+
+        <p>The ingredient IDs that these ranges consider to be fresh are 3, 4, 5, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, and 20. So, in this example, the fresh ingredient ID ranges consider a total of <strong>14</strong> ingredient IDs to be fresh.</p>
+
+        <p>Process the database file again. <strong>How many ingredient IDs are considered to be fresh according to the fresh ingredient ID ranges?</strong></p>
+
+        <div class="answer">Part 2 Answer: 353,716,783,056,994</div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- How It Works Dialog -->
+  <dialog id="howItWorksDialog">
+    <div class="dialog-header">
+      <h2>How the Solver Works</h2>
+      <button class="dialog-close" id="closeHowItWorksBtn">Close</button>
+    </div>
+    <div class="dialog-content">
+      <div class="description-text">
+        <p>The solver uses a <strong>range-merging algorithm</strong> to count all unique fresh ingredient IDs without enumerating them individually (which would be impossible given the trillions of IDs).</p>
+
+        <h3 class="part-header">The Algorithm</h3>
+
+        <ol>
+          <li><strong>Parse ranges</strong>: Read all 182 fresh ingredient ID ranges from the input.</li>
+          <li><strong>Sort by start</strong>: Arrange ranges in ascending order by their start value.</li>
+          <li><strong>Merge overlapping ranges</strong>: Iterate through sorted ranges. If a range overlaps with or is adjacent to the previous merged range, extend it; otherwise, start a new merged range.</li>
+          <li><strong>Sum the sizes</strong>: Calculate <code>end - start + 1</code> for each merged range and sum them all.</li>
+        </ol>
+
+        <h3 class="part-header">Why Merging Works</h3>
+
+        <p>Ranges can overlap. The range <code>10-14</code> and <code>12-18</code> share IDs 12, 13, and 14. Simply summing range sizes would count these IDs multiple times. Merging produces <code>10-18</code>, correctly counting each ID once.</p>
+
+        <h3 class="part-header">What the Visualization Shows</h3>
+
+        <ul>
+          <li><strong>Green bars (top)</strong>: Original ranges displayed on a normalized number line.</li>
+          <li><strong>Blue highlight</strong>: Range being added as a new merged segment.</li>
+          <li><strong>Orange highlight</strong>: Range merging with the previous segment.</li>
+          <li><strong>Light green bars (bottom)</strong>: Current merged ranges.</li>
+          <li><strong>Running total</strong>: Accumulated count of fresh IDs as merging proceeds.</li>
+        </ul>
+
+        <h3 class="part-header">Scale</h3>
+
+        <p>The actual ingredient IDs range from about 1 trillion to 562 trillion. The visualization normalizes these to fit on screen while preserving relative positions and proportions. The final answer — <strong>353,716,783,056,994</strong> fresh IDs — represents about 63% of the total ID space covered by the merged ranges.</p>
+      </div>
+    </div>
+  </dialog>
+
+  <script type="module" src="day05-visualizer.js"></script>
+</body>
+</html>
