@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 06 — Trash Compactor</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Trebuchet MS', 'Futura', 'Gill Sans', sans-serif;
+      background: radial-gradient(circle at 30% 30%, #142233, #0d1520 60%);
+      color: #e8f4f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 1400px;
+      background: linear-gradient(160deg, #142233, #0d1520 70%);
+      border: 2px solid #06d6a0;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 0 60px rgba(6, 214, 160, 0.08);
+      padding: 22px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 26px;
+      letter-spacing: 0.5px;
+      color: #06d6a0;
+      text-shadow: 0 4px 10px rgba(6, 214, 160, 0.35);
+    }
+
+    .badge {
+      padding: 8px 14px;
+      background: linear-gradient(120deg, #1a2a3d, #142233);
+      border: 1px solid #118ab2;
+      border-radius: 12px;
+      color: #73a9c2;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .panel {
+      background: linear-gradient(140deg, rgba(6, 214, 160, 0.06), rgba(13, 21, 32, 0.8));
+      border: 1px solid #118ab2;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: inset 0 0 12px rgba(26, 42, 61, 0.5);
+    }
+
+    label {
+      display: block;
+      color: #73a9c2;
+      font-size: 13px;
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px dashed #118ab2;
+      background: rgba(26, 42, 61, 0.6);
+      color: #e8f4f8;
+      cursor: pointer;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #118ab2;
+      background: linear-gradient(135deg, #1a2a3d, #142233);
+      color: #e8f4f8;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+
+    select:focus, button:focus, input[type="file"]:focus {
+      outline: none;
+      border-color: #06d6a0;
+      box-shadow: 0 0 0 3px rgba(6, 214, 160, 0.25);
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.4);
+      border-color: #06d6a0;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .primary {
+      background: linear-gradient(130deg, #118ab2, #0a6a8a);
+      border-color: #06d6a0;
+      color: #fff;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    canvas {
+      width: 100%;
+      border-radius: 14px;
+      border: 2px solid #118ab2;
+      background: radial-gradient(circle at 50% 30%, rgba(6, 214, 160, 0.04), rgba(13, 21, 32, 0.95));
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.4), 0 18px 42px rgba(0, 0, 0, 0.5);
+    }
+
+    .info {
+      margin-top: 14px;
+      color: #73a9c2;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .info strong {
+      color: #06d6a0;
+    }
+
+    /* Dialog styles */
+    dialog {
+      background: linear-gradient(160deg, #142233, #0d1520 70%);
+      border: 2px solid #118ab2;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 60px rgba(6, 214, 160, 0.08);
+      color: #e8f4f8;
+      max-width: 700px;
+      max-height: 80vh;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    dialog::backdrop {
+      background: rgba(13, 21, 32, 0.85);
+      backdrop-filter: blur(4px);
+    }
+
+    .dialog-content {
+      padding: 24px 28px;
+      overflow-y: auto;
+      max-height: calc(80vh - 60px);
+    }
+
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: linear-gradient(120deg, #1a2a3d, #142233);
+      border-bottom: 1px solid #118ab2;
+    }
+
+    .dialog-header h2 {
+      font-size: 20px;
+      color: #06d6a0;
+      margin: 0;
+    }
+
+    .dialog-close {
+      background: transparent;
+      border: 1px solid #73a9c2;
+      border-radius: 8px;
+      color: #73a9c2;
+      padding: 6px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      width: auto;
+    }
+
+    .dialog-close:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #ef4444;
+      color: #ef4444;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .description-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #a3c9d9;
+    }
+
+    .description-text p {
+      margin-bottom: 14px;
+    }
+
+    .description-text code {
+      background: rgba(6, 214, 160, 0.12);
+      border: 1px solid rgba(6, 214, 160, 0.25);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      color: #06d6a0;
+    }
+
+    .description-text pre {
+      background: rgba(13, 21, 32, 0.8);
+      border: 1px solid #118ab2;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 14px 0;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      color: #73d2de;
+    }
+
+    .description-text ul,
+    .description-text ol {
+      margin: 12px 0 12px 24px;
+    }
+
+    .description-text li {
+      margin-bottom: 8px;
+    }
+
+    .description-text strong, .description-text em {
+      color: #06d6a0;
+    }
+
+    .part-header {
+      font-size: 16px;
+      color: #ffd166;
+      margin: 20px 0 12px 0;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 209, 102, 0.3);
+    }
+
+    .answer {
+      background: linear-gradient(120deg, rgba(6, 214, 160, 0.1), rgba(17, 138, 178, 0.1));
+      border: 1px solid #118ab2;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-top: 12px;
+      color: #06d6a0;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <h1>Day 06: Trash Compactor</h1>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button id="descriptionBtn" class="badge" style="cursor: pointer; border: none; font-size: 14px;">? Description</button>
+        <button id="howItWorksBtn" class="badge" style="cursor: pointer; border: none; font-size: 14px;">? How It Works</button>
+        <div class="badge">Part 2 — Cephalopod Math</div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="panel">
+        <label for="fileInput">Load JSON log</label>
+        <input type="file" id="fileInput" accept=".json">
+      </div>
+      <div class="panel">
+        <label for="speedSelect">Playback speed</label>
+        <select id="speedSelect">
+          <option value="0.5">0.5x</option>
+          <option value="0.75">0.75x</option>
+          <option value="1">1x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2" selected>2x</option>
+          <option value="3">3x</option>
+          <option value="4">4x</option>
+          <option value="5">5x</option>
+        </select>
+      </div>
+      <div class="panel">
+        <label>Playback</label>
+        <button id="startBtn" class="primary" disabled>Play from start</button>
+      </div>
+      <div class="panel">
+        <label>Record</label>
+        <button id="recordBtn" disabled>Record WebM</button>
+      </div>
+      <div class="panel">
+        <label>Stop</label>
+        <button id="stopBtn" disabled>Stop</button>
+      </div>
+    </div>
+
+    <canvas id="canvas" width="1280" height="720"></canvas>
+
+    <p class="info">
+      Load a JSON log emitted by the solver to watch cephalopod math being solved. Problems are read <strong>right-to-left</strong> with numbers assembled from vertical columns. Grand total: <strong>10,227,753,257,799</strong>.
+    </p>
+  </div>
+
+  <!-- Puzzle Description Dialog -->
+  <dialog id="descriptionDialog">
+    <div class="dialog-header">
+      <h2>Day 6: Trash Compactor</h2>
+      <button class="dialog-close" id="closeDialogBtn">Close</button>
+    </div>
+    <div class="dialog-content">
+      <div class="description-text">
+        <p>After helping the Elves in the kitchen, you were taking a break and helping them re-enact a movie scene when you over-enthusiastically jumped into the garbage chute!</p>
+
+        <p>A brief fall later, you find yourself in a garbage smasher. Unfortunately, the door's been magnetically sealed.</p>
+
+        <p>As you try to find a way out, you are approached by a family of <em>cephalopods</em>! They're pretty sure they can get the door open, but it will take some time. While you wait, they're curious if you can help the youngest cephalopod with her math homework.</p>
+
+        <p>Cephalopod math doesn't look that different from normal math. The math worksheet (your puzzle input) consists of a list of problems; each problem has a group of numbers that need to be either added (<code>+</code>) or multiplied (<code>*</code>) together.</p>
+
+        <p>However, the problems are arranged a little strangely; they seem to be presented next to each other in a very long horizontal list:</p>
+
+        <pre>123 328  51 64
+ 45 64  387 23
+  6 98  215 314
+*   +   *   +  </pre>
+
+        <p>Each problem's numbers are arranged vertically; at the bottom of the problem is the symbol for the operation that needs to be performed. Problems are separated by a full column of only spaces.</p>
+
+        <div class="answer">Part 1 Answer: 5,227,286,044,585</div>
+
+        <h3 class="part-header">Part Two</h3>
+
+        <p>The big cephalopods come back to check on how things are going. When they see that your grand total doesn't match the one expected by the worksheet, they realize they forgot to explain how to read cephalopod math.</p>
+
+        <p><strong>Cephalopod math is written right-to-left in columns.</strong> Each number is given in its own column, with the most significant digit at the top and the least significant digit at the bottom.</p>
+
+        <p>Reading the problems right-to-left one column at a time, the problems are now quite different:</p>
+
+        <ul>
+          <li>The rightmost problem is <code>4 + 431 + 623 = 1058</code></li>
+          <li>The second problem from the right is <code>175 * 581 * 32 = 3253600</code></li>
+          <li>The third problem from the right is <code>8 + 248 + 369 = 625</code></li>
+          <li>Finally, the leftmost problem is <code>356 * 24 * 1 = 8544</code></li>
+        </ul>
+
+        <p>Now, the grand total is <code>1058 + 3253600 + 625 + 8544 = 3263827</code>.</p>
+
+        <div class="answer">Part 2 Answer: 10,227,753,257,799</div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- How It Works Dialog -->
+  <dialog id="howItWorksDialog">
+    <div class="dialog-header">
+      <h2>How the Solver Works</h2>
+      <button class="dialog-close" id="closeHowItWorksBtn">Close</button>
+    </div>
+    <div class="dialog-content">
+      <div class="description-text">
+        <p>The solver reads the math worksheet using <strong>cephalopod reading rules</strong>: right-to-left, with numbers built from vertical columns.</p>
+
+        <h3 class="part-header">The Algorithm</h3>
+
+        <ol>
+          <li><strong>Parse the grid</strong>: Read the worksheet as a 2D character array.</li>
+          <li><strong>Identify problem boundaries</strong>: Find columns that are entirely spaces — these separate problems.</li>
+          <li><strong>Process right-to-left</strong>: Start from the rightmost problem and work left.</li>
+          <li><strong>Read each column</strong>: Within a problem, each column represents one number. Read digits top-to-bottom (most significant digit at top).</li>
+          <li><strong>Extract operator</strong>: The bottom row contains <code>+</code> or <code>*</code>.</li>
+          <li><strong>Calculate</strong>: Apply the operation to all numbers in the problem.</li>
+          <li><strong>Sum results</strong>: Add each problem's result to get the grand total.</li>
+        </ol>
+
+        <h3 class="part-header">Column Reading Example</h3>
+
+        <p>For the column with characters <code>1</code>, <code>4</code>, <code>6</code> (top to bottom), the number is <code>146</code>.</p>
+
+        <p>Empty cells or spaces in a column are ignored — only digits contribute to the number.</p>
+
+        <h3 class="part-header">What the Visualization Shows</h3>
+
+        <ul>
+          <li><strong>Grid display</strong>: The worksheet with character cells visible.</li>
+          <li><strong>Active problem highlight</strong>: Glowing columns for the current problem.</li>
+          <li><strong>RTL indicator</strong>: Arrow showing the right-to-left reading direction.</li>
+          <li><strong>Calculation panel</strong>: Numbers, operator, and result for the current problem.</li>
+          <li><strong>Running total</strong>: Accumulated sum as problems are solved.</li>
+        </ul>
+
+        <h3 class="part-header">Scale</h3>
+
+        <p>The worksheet contains many problems, and numbers can be quite large. The final answer — <strong>10,227,753,257,799</strong> — demonstrates the scale of the calculations involved.</p>
+      </div>
+    </div>
+  </dialog>
+
+  <script type="module" src="day06-visualizer.js"></script>
+</body>
+</html>

@@ -52,9 +52,9 @@ instrumented = ["part2", "serde", "serde_json"]
 
 ### **Core priorities (in order)**
 
-1. **No code duplication.** Never duplicate functions or logic to add instrumentation. The same function must serve both instrumented and non-instrumented builds.
-2. **No structural changes.** Preserve the original control flow, function signatures, and code organization. Add instrumentation calls inline, not by restructuring.
-3. **No local tracking variables.** Do not introduce local variables in application code to track progress, counts, or state for instrumentation. All such state belongs inside the `Instrumentation` struct and is updated by calling its methods.
+1. **No local tracking variables.** This is the most important rule. Never introduce local variables in application code to track progress, counts, positions, or any other state for instrumentation purposes. All such state must reside inside the `Instrumentation` struct and be updated exclusively by calling its methods. Instrumentation variables are strictly forbidden in application code—they belong inside the `Instrumentation` struct.
+2. **No code duplication.** Never duplicate existing functions or logic to add instrumentation. The same function must serve both instrumented and non-instrumented builds.
+3. **No structural changes.** Preserve the original control flow, function signatures, and code organization. Add instrumentation calls inline, not by restructuring.
 
 ### **Minimal intrusion**
 
@@ -177,10 +177,34 @@ fn part2(map: &[Vec<char>], inst: &mut Instrumentation) { ... }
 fn part2(map: &[Vec<char>]) { ... }
 ```
 
-### ❌ Adding local tracking variables
+### ❌ Adding local tracking variables (MOST CRITICAL VIOLATION)
+
+This is the most common and serious anti-pattern. Any variable introduced solely to collect or track data for instrumentation violates the core design principle.
 
 ```rust
-// WRONG: Local variable for instrumentation tracking
+// WRONG: Local variables for instrumentation tracking
+#[cfg(feature = "instrumented")]
+let mut column_ranges: Vec<(usize, usize)> = Vec::new();
+#[cfg(feature = "instrumented")]
+let mut col_start: usize = 0;
+#[cfg(feature = "instrumented")]
+let mut col_end: Option<usize> = None;
+
+for c in columns {
+    // ... processing ...
+    #[cfg(feature = "instrumented")]
+    {
+        if col_end.is_none() { col_end = Some(c); }
+        col_start = c;
+    }
+}
+#[cfg(feature = "instrumented")]
+column_ranges.push((col_start, col_end.unwrap()));
+inst.emit_problem(&column_ranges, ...);  // WRONG: passing local tracking data
+```
+
+```rust
+// ALSO WRONG: Local collection for batch emission
 let mut removed_this_pass = Vec::new();
 for y in 0..height {
     for x in 0..width {
@@ -191,6 +215,8 @@ for y in 0..height {
 }
 inst.emit_pass(&removed_this_pass);
 ```
+
+**Why this is wrong:** The variables `column_ranges`, `col_start`, `col_end`, and `removed_this_pass` exist solely to serve instrumentation. They clutter application code with instrumentation concerns and violate the separation of responsibilities.
 
 ### ✅ Correct pattern
 
