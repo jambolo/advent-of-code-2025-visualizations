@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "tsc -p tsconfig.json && npm run copy-support-files",
+    "build": "tsc -p tsconfig.json && pnpm run copy-support-files",
     "copy-support-files": "cpx \"apps/day*/{index.html,recording.json}\" dist/apps",
     "test": "jest",
     "test:coverage": "jest --coverage"
