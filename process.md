@@ -12,9 +12,7 @@ Each visualization is **independent** and based solely on its puzzle’s materia
 No visualization depends on any other puzzle.
 Visualizers may reuse **generic animation/recording utilities**, but all puzzle-specific data formats, rendering logic, and theme decisions are unique per puzzle.
 
-A coding-capable LLM (Codex) performs all analysis and generates TypeScript visualization code.
-The LLM **never** generates Rust code.
-You implement Rust logging manually according to the puzzle-specific specification.
+A coding-capable LLM (Claude Code) performs all analysis and generates TypeScript visualization code.
 
 ---
 
@@ -29,20 +27,19 @@ At this stage, no visualization logic or logging exists.
 
 # **2. Provide Puzzle Materials to the LLM**
 
-Inputs provided to Codex:
+Inputs provided to Claude Code:
 
 * Puzzle description
 * Rust solver source for the puzzle within the submodule
 * Puzzle input
-* The overall visualization goal
 
-Codex uses only these puzzle-specific items.
+Claude Code uses only these puzzle-specific items.
 
 ---
 
 # **3. LLM Phase 1 — Algorithm Analysis**
 
-Codex analyzes the solver and input and produces:
+Claude Code analyzes the solver and input and produces:
 
 * A description of the algorithm
 * Identification of state transitions and key data structures
@@ -54,7 +51,7 @@ No Rust code is produced.
 
 # **4. LLM Phase 2 — Theme Derivation**
 
-Codex interprets the puzzle description and generates:
+Claude Code interprets the puzzle description and generates:
 
 * A theme concept (mood, style, colors, fonts)
 * Guidance for how the theme appears in the animation
@@ -63,9 +60,9 @@ Theme is puzzle-specific.
 
 ---
 
-# **7. LLM Phase 3 — Visualization Application Generation**
+# **5. LLM Phase 3 — Visualization Application Generation**
 
-Codex generates a complete visualization design **before** logging is implemented.
+Claude Code generates a complete visualization design **before** logging is implemented.
 
 Outputs:
 
@@ -86,17 +83,16 @@ Outputs:
 
 ---
 
-# **5. Implement Logging in Rust**
+# **6. Implement Logging in Rust**
 
-Using the puzzle-specific specification from Step 7:
+Using the puzzle-specific specification from Step 5:
 
-* You manually add logging to the puzzle’s Rust solver.
-* You ensure the solver emits the exact structure Codex requires.
-* No Rust code is generated or recommended by the LLM.
+* The LLM adds logging to the puzzle’s Rust solver.
+* THe LLM ensures the solver emits the exact structure the visualizer application requires.
 
 ---
 
-# **6. Run the Instrumented Solver**
+# **7. Run the Instrumented Solver**
 
 * Run the solver in the submodule to produce the puzzle’s log file.
 * Confirm correct puzzle answer and correct log format.
@@ -123,11 +119,11 @@ Publish the `.webm` animation for Advent of Code participants.
 # **10. Summary**
 
 1. Solver exists in `advent-of-code-2025/`.
-2. Provide solver, input, and description to Codex.
-3. Codex analyzes algorithm.
-4. Codex extracts theme.
-5. Codex generates visualization design and logging specification.
-6. You implement logging in Rust according to that specification.
+2. Provide solver, input, and description to Claude Code.
+3. Claude Code analyzes algorithm.
+4. Claude Code extracts theme.
+5. Claude Code generates visualization design and logging specification.
+6. Claude Code implements logging in Rust according to that specification.
 7. Run solver to generate log.
 8. Run LLM-produced visualizer to generate `.webm`.
 9. Publish.

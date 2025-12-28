@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 9: Movie Theater - Advent of Code 2025</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #1a0f1a;
+      color: #FFFFF0;
+      font-family: Georgia, 'Times New Roman', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #FFD700;
+      font-size: 2rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .subtitle {
+      color: #C9A227;
+      margin-bottom: 20px;
+    }
+
+    .canvas-container {
+      border: 4px solid #C0C0C0;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(201, 162, 39, 0.3);
+    }
+
+    #visualizer {
+      display: block;
+      background-color: #2D1B2E;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    button {
+      background: linear-gradient(180deg, #4a3a4a 0%, #2D1B2E 100%);
+      border: 2px solid #C9A227;
+      color: #FFFFF0;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-family: Georgia, serif;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: linear-gradient(180deg, #5a4a5a 0%, #3D2B3E 100%);
+      border-color: #FFD700;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .file-input-wrapper button {
+      pointer-events: none;
+    }
+
+    #fileInput {
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0,0,0,0.3);
+      padding: 8px 15px;
+      border-radius: 4px;
+      border: 1px solid #C9A227;
+    }
+
+    .speed-control label {
+      color: #C9A227;
+    }
+
+    #speedControl {
+      width: 100px;
+      accent-color: #FFD700;
+    }
+
+    #speedValue {
+      color: #FFD700;
+      font-weight: bold;
+      min-width: 40px;
+    }
+
+    #status {
+      margin-top: 15px;
+      color: #C9A227;
+      font-style: italic;
+    }
+
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: linear-gradient(180deg, #2D1B2E 0%, #1a0f1a 100%);
+      border: 3px solid #C9A227;
+      border-radius: 8px;
+      max-width: 700px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 30px;
+      position: relative;
+      box-shadow: 0 0 50px rgba(201, 162, 39, 0.4);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 28px;
+      color: #C9A227;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    .modal-close:hover {
+      color: #FFD700;
+    }
+
+    .modal h2 {
+      color: #FFD700;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #C9A227;
+      padding-bottom: 10px;
+    }
+
+    .modal h3 {
+      color: #C9A227;
+      margin: 20px 0 10px 0;
+    }
+
+    .modal p {
+      line-height: 1.7;
+      margin-bottom: 15px;
+    }
+
+    .modal pre {
+      background: #1a0f1a;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      border: 1px solid #4a3a4a;
+      font-family: Monaco, monospace;
+      font-size: 13px;
+    }
+
+    .modal ul, .modal ol {
+      margin-left: 20px;
+      margin-bottom: 15px;
+    }
+
+    .modal li {
+      line-height: 1.6;
+      margin-bottom: 5px;
+    }
+
+    .example {
+      background: #1a0f1a;
+      padding: 10px;
+      border-left: 3px solid #C9A227;
+      margin: 10px 0;
+      font-family: Monaco, monospace;
+      font-size: 12px;
+      white-space: pre;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎬 Day 9: Movie Theater</h1>
+  <p class="subtitle">Advent of Code 2025 - Finding the Largest Rectangle</p>
+
+  <div class="canvas-container">
+    <canvas id="visualizer" width="1280" height="720"></canvas>
+  </div>
+
+  <div class="controls">
+    <div class="file-input-wrapper">
+      <button>📁 Load JSON</button>
+      <input type="file" id="fileInput" accept=".json">
+    </div>
+    <button id="playBtn">▶ Play</button>
+    <button id="pauseBtn">⏸ Pause</button>
+    <button id="resetBtn">⏮ Reset</button>
+    <button id="recordBtn">⏺ Record</button>
+    <div class="speed-control">
+      <label for="speedControl">Speed:</label>
+      <input type="range" id="speedControl" min="0.5" max="5" step="0.5" value="1">
+      <span id="speedValue">1.0x</span>
+    </div>
+    <button id="descriptionBtn">📜 Puzzle</button>
+    <button id="algorithmBtn">🔧 Algorithm</button>
+  </div>
+
+  <p id="status">Load a recording.json file to begin</p>
+
+  <!-- Puzzle Description Modal -->
+  <div id="descriptionModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h2>Day 9: Movie Theater</h2>
+
+      <p>You slide down the firepole in the corner of the playground and land in the North Pole base movie theater!</p>
+
+      <p>The movie theater has a big tile floor with an interesting pattern. Elves here are redecorating the theater by switching out some of the square tiles in the big grid they form. Some of the tiles are <strong>red</strong>; the Elves would like to find the largest rectangle that uses red tiles for two of its opposite corners.</p>
+
+      <h3>Example Grid</h3>
+      <div class="example">.............
+.......#...#..
+..............
+..#....#......
+..............
+..#......#....
+..............
+.........#.#..
+..............</div>
+
+      <h3>Part 1</h3>
+      <p>Using any two red tiles as opposite corners, find the largest rectangle possible.</p>
+
+      <h3>Part 2</h3>
+      <p>The red tiles are connected by <strong>green</strong> tiles forming a closed loop. The rectangle must only include red or green tiles. Every red tile connects to its neighbors in the list via straight lines of green tiles. Interior points of the loop are also green.</p>
+
+      <div class="example">.............
+.......#XXX#..
+.......XXXXX..
+..#XXXX#XXXX..
+..XXXXXXXXXX..
+..#XXXXXX#XX..
+.........XXX..
+.........#X#..
+..............</div>
+
+      <p>Using two red tiles as opposite corners, what is the largest area of any rectangle you can make using <em>only red and green tiles</em>?</p>
+
+      <h3>Answers</h3>
+      <ul>
+        <li><strong>Part 1:</strong> 4,741,451,444</li>
+        <li><strong>Part 2:</strong> 1,562,459,680</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Algorithm Modal -->
+  <div id="algorithmModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h2>How the Solution Works</h2>
+
+      <h3>Overview</h3>
+      <p>The solver finds the largest axis-aligned rectangle with red corners that lies entirely within the polygon formed by red and green tiles.</p>
+
+      <h3>Algorithm Steps</h3>
+      <ol>
+        <li><strong>Parse corners:</strong> Load all 496 red tile coordinates from the input file.</li>
+        <li><strong>Build edges:</strong> Create edges connecting consecutive corners (including wrapping from last to first) to form a closed polygon.</li>
+        <li><strong>Normalize edges:</strong> Order each edge's vertices so the smaller coordinate comes first.</li>
+        <li><strong>Generate candidates:</strong> For every pair of corners (i, j), treat them as opposite corners of a potential rectangle.</li>
+        <li><strong>Part 2 containment check:</strong>
+          <ul>
+            <li>Verify no polygon edge crosses through the rectangle's interior</li>
+            <li>Use ray-casting: cast a ray from the rectangle's interior and count how many horizontal edges it crosses</li>
+            <li>Odd crossings = inside the polygon (valid)</li>
+          </ul>
+        </li>
+        <li><strong>Track maximum:</strong> Keep the rectangle with the largest area that passes all checks.</li>
+      </ol>
+
+      <h3>Key Functions</h3>
+      <ul>
+        <li><code>crosses()</code> - Checks if a polygon edge intersects the rectangle's boundary</li>
+        <li><code>fully_contained()</code> - Combines edge-crossing check with ray-cast interior test</li>
+        <li><code>consecutive_pairs()</code> - Iterates through adjacent corners including wrap-around</li>
+      </ul>
+
+      <h3>Complexity</h3>
+      <p>With N corners, there are N×(N-1)/2 candidate pairs to check. For 496 corners, that's 122,760 potential rectangles. The containment check is O(E) where E is the number of edges.</p>
+
+      <h3>Visualization</h3>
+      <p>This animation shows the solver evaluating candidate rectangles, highlighting valid ones in green and the current best in gold. The spotlight effect marks discoveries of new maximum areas.</p>
+    </div>
+  </div>
+
+  <script src="day09-visualizer.js"></script>
+</body>
+</html>
