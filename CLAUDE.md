@@ -41,7 +41,7 @@ This repository creates browser-based visualizations for Advent of Code 2025 puz
 pnpm run build        # Compile TypeScript and copy support files to dist/
 pnpm test             # Run Jest tests
 pnpm run test:coverage # Run tests with coverage
-npx cd ~/projects/advent-of-code-2025-visualizations && npx serve dist/apps/dayNN # Serve day NN (required to run from project root)
+cd ~/projects/advent-of-code-2025-visualizations && pnpm dlx serve dist/apps/dayNN # Serve day NN (required to run from project root)
 pnpm build # Build the app and publish to dist folder
 ```
 

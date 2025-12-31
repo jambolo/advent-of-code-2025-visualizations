@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 11: Reactor - Advent of Code 2025</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #050810;
+      color: #e0f0ff;
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #00ffff;
+      font-size: 2rem;
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    }
+
+    .subtitle {
+      color: #ff00ff;
+      margin-bottom: 20px;
+    }
+
+    .canvas-container {
+      border: 3px solid #00ffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.3), 0 0 80px rgba(255, 0, 255, 0.2);
+    }
+
+    #visualizer {
+      display: block;
+      background-color: #0a0e1a;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    button {
+      background: linear-gradient(180deg, #1a2a4a 0%, #0a1525 100%);
+      border: 2px solid #00ffff;
+      color: #e0f0ff;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: linear-gradient(180deg, #2a3a5a 0%, #1a2535 100%);
+      border-color: #ff00ff;
+      box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .file-input-wrapper button {
+      pointer-events: none;
+    }
+
+    #fileInput {
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 8px 15px;
+      border-radius: 4px;
+      border: 1px solid #00ffff;
+    }
+
+    .speed-control label {
+      color: #ff00ff;
+    }
+
+    #speedControl {
+      width: 100px;
+      accent-color: #00ffff;
+    }
+
+    #speedValue {
+      color: #00ffff;
+      font-weight: bold;
+      min-width: 40px;
+    }
+
+    #status {
+      margin-top: 15px;
+      color: #ffaa00;
+      font-style: italic;
+    }
+
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(5, 8, 16, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: linear-gradient(180deg, #1a2035 0%, #0a0e1a 100%);
+      border: 3px solid #00ffff;
+      border-radius: 8px;
+      max-width: 700px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 30px;
+      position: relative;
+      box-shadow: 0 0 60px rgba(0, 255, 255, 0.3);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 28px;
+      color: #00ffff;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    .modal-close:hover {
+      color: #ff00ff;
+    }
+
+    .modal h2 {
+      color: #00ffff;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #ff00ff;
+      padding-bottom: 10px;
+    }
+
+    .modal h3 {
+      color: #ffaa00;
+      margin: 20px 0 10px 0;
+    }
+
+    .modal p {
+      line-height: 1.7;
+      margin-bottom: 15px;
+    }
+
+    .modal pre {
+      background: #050810;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      border: 1px solid #1a4a5a;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+
+    .modal ul, .modal ol {
+      margin-left: 20px;
+      margin-bottom: 15px;
+    }
+
+    .modal li {
+      line-height: 1.6;
+      margin-bottom: 5px;
+    }
+
+    .example {
+      background: #050810;
+      padding: 10px;
+      border-left: 3px solid #ffaa00;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .highlight {
+      color: #00ff88;
+      font-weight: bold;
+    }
+
+    .key-node {
+      color: #ffaa00;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Day 11: Reactor</h1>
+  <p class="subtitle">Advent of Code 2025 - Network Path Analysis</p>
+
+  <div class="canvas-container">
+    <canvas id="visualizer" width="1280" height="720"></canvas>
+  </div>
+
+  <div class="controls">
+    <div class="file-input-wrapper">
+      <button>Load JSON</button>
+      <input type="file" id="fileInput" accept=".json">
+    </div>
+    <button id="playBtn">Play</button>
+    <button id="pauseBtn">Pause</button>
+    <button id="resetBtn">Reset</button>
+    <button id="recordBtn">Record</button>
+    <div class="speed-control">
+      <label for="speedControl">Speed:</label>
+      <input type="range" id="speedControl" min="0.5" max="5" step="0.5" value="1">
+      <span id="speedValue">1.0x</span>
+    </div>
+    <button id="descriptionBtn">Puzzle</button>
+    <button id="algorithmBtn">Algorithm</button>
+  </div>
+
+  <p id="status">Load a recording.json file to begin</p>
+
+  <!-- Puzzle Description Modal -->
+  <div id="descriptionModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h2>Day 11: Reactor</h2>
+
+      <p>You hear some loud beeping coming from a hatch in the floor of the factory, so you decide to check it out. Inside, you find several large electrical conduits and a ladder.</p>
+
+      <p>Climbing down the ladder, you discover the source of the beeping: a large, toroidal reactor which powers the factory above. Some Elves here are hurriedly running between the reactor and a nearby server rack, apparently trying to fix something.</p>
+
+      <p>One of the Elves notices you and rushes over. "It's a good thing you're here! We just installed a new server rack, but we aren't having any luck getting the reactor to communicate with it!"</p>
+
+      <h3>The Device Network</h3>
+
+      <p>Each line in the input gives the name of a device followed by a list of the devices to which its outputs are attached. For example, <span class="example">bbb: ddd eee</span> means that device <span class="highlight">bbb</span> has two outputs, one leading to device <span class="highlight">ddd</span> and the other leading to device <span class="highlight">eee</span>.</p>
+
+      <p>Data only ever flows from a device through its outputs; it can't flow backwards. The network forms a Directed Acyclic Graph (DAG).</p>
+
+      <h3>Part 1</h3>
+      <p>Find every path from <span class="key-node">you</span> to <span class="key-node">out</span>.</p>
+      <p><strong>Answer:</strong> <span class="highlight">523</span> paths</p>
+
+      <h3>Part 2</h3>
+      <p>The Elves have figured out that the problematic data path passes through both <span class="key-node">dac</span> (digital-to-analog converter) and <span class="key-node">fft</span> (fast Fourier transform device).</p>
+
+      <p>Find all paths from <span class="key-node">svr</span> (the server rack) to <span class="key-node">out</span> that visit both <span class="key-node">dac</span> and <span class="key-node">fft</span> (in any order).</p>
+
+      <h3>Example</h3>
+      <div class="example">svr: aaa bbb
+aaa: fft
+fft: ccc
+bbb: tty
+tty: ccc
+ccc: ddd eee
+ddd: hub
+hub: fff
+eee: dac
+dac: fff
+fff: ggg hhh
+ggg: out
+hhh: out</div>
+
+      <p>Only <span class="highlight">2</span> paths from svr to out visit both dac and fft:</p>
+      <div class="example">svr,aaa,fft,ccc,eee,dac,fff,ggg,out
+svr,aaa,fft,ccc,eee,dac,fff,hhh,out</div>
+
+      <h3>Answer</h3>
+      <p><strong>Part 2:</strong> <span class="highlight">517,315,308,154,944</span> paths</p>
+    </div>
+  </div>
+
+  <!-- Algorithm Modal -->
+  <div id="algorithmModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h2>How the Solution Works</h2>
+
+      <h3>Overview</h3>
+      <p>The solver uses a clever <strong>segment decomposition</strong> strategy. Instead of enumerating all paths (impossible with 517 trillion paths!), it breaks the problem into independent segments and multiplies their path counts.</p>
+
+      <h3>Key Insight</h3>
+      <p>Since paths must visit both <span class="key-node">fft</span> and <span class="key-node">dac</span>, the full path can be split into three segments:</p>
+      <ul>
+        <li>Segment 1: <span class="key-node">svr</span> → first checkpoint</li>
+        <li>Segment 2: First checkpoint → second checkpoint</li>
+        <li>Segment 3: Second checkpoint → <span class="key-node">out</span></li>
+      </ul>
+
+      <h3>Determining Order</h3>
+      <p>First, check if paths exist from <span class="key-node">fft</span> to <span class="key-node">dac</span>:</p>
+      <ul>
+        <li>If yes: paths go svr→fft→dac→out</li>
+        <li>If no: paths go svr→dac→fft→out</li>
+      </ul>
+
+      <h3>Graph Reduction</h3>
+      <p>Before counting each segment, the solver <strong>reduces</strong> the graph:</p>
+      <ol>
+        <li>Find nodes that only connect to "out" (dead ends for intermediate counting)</li>
+        <li>Collapse these nodes, replacing references with "out"</li>
+        <li>Repeat until no more reductions possible</li>
+      </ol>
+      <p>This prevents overcounting paths that exit early.</p>
+
+      <h3>Recursive Path Counting</h3>
+      <p>For each segment, recursively count paths:</p>
+      <div class="example">count_paths(from, to):
+    if from has no outputs: return 0
+    total = 0
+    for each output of from:
+        if output == to: total += 1
+        else: total += count_paths(output, to)
+    return total</div>
+
+      <h3>Final Multiplication</h3>
+      <p>Total valid paths = paths(svr→fft) × paths(fft→dac) × paths(dac→out)</p>
+      <div class="example">= 3,952 × 1,414,944 × 92,456
+= 517,315,308,154,944</div>
+
+      <h3>Why This Works</h3>
+      <p>The multiplication works because:</p>
+      <ul>
+        <li>Every path through segment 1 can combine with every path through segment 2</li>
+        <li>The segments are independent once we fix the checkpoint ordering</li>
+        <li>No path can skip a checkpoint (enforced by graph structure)</li>
+      </ul>
+
+      <h3>Complexity</h3>
+      <p>Instead of O(paths) which is infeasible, the algorithm runs in O(nodes × edges) time by counting rather than enumerating.</p>
+    </div>
+  </div>
+
+  <script src="day11-visualizer.js"></script>
+</body>
+</html>
