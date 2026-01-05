@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 12: Christmas Tree Farm - Advent of Code 2025</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #1a2f1a;
+      color: #fffaf0;
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #ffd700;
+      font-size: 2rem;
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+
+    .subtitle {
+      color: #dc143c;
+      margin-bottom: 20px;
+    }
+
+    .canvas-container {
+      border: 3px solid #228b22;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(34, 139, 34, 0.3), 0 0 80px rgba(255, 215, 0, 0.2);
+    }
+
+    #visualizer {
+      display: block;
+      background-color: #0f1f0f;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    button {
+      background: linear-gradient(180deg, #2a4a2a 0%, #1a2f1a 100%);
+      border: 2px solid #228b22;
+      color: #fffaf0;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: linear-gradient(180deg, #3a5a3a 0%, #2a3f2a 100%);
+      border-color: #ffd700;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .file-input-wrapper button {
+      pointer-events: none;
+    }
+
+    #fileInput {
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 8px 15px;
+      border-radius: 4px;
+      border: 1px solid #228b22;
+    }
+
+    .speed-control label {
+      color: #dc143c;
+    }
+
+    #speedControl {
+      width: 100px;
+      accent-color: #228b22;
+    }
+
+    #speedValue {
+      color: #228b22;
+      font-weight: bold;
+      min-width: 40px;
+    }
+
+    #status {
+      margin-top: 15px;
+      color: #ffaa00;
+      font-style: italic;
+    }
+
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(26, 47, 26, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: linear-gradient(180deg, #2a4a2a 0%, #1a2f1a 100%);
+      border: 3px solid #228b22;
+      border-radius: 8px;
+      max-width: 700px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 30px;
+      position: relative;
+      box-shadow: 0 0 60px rgba(34, 139, 34, 0.3);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 28px;
+      color: #228b22;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    .modal-close:hover {
+      color: #ffd700;
+    }
+
+    .modal h2 {
+      color: #ffd700;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #dc143c;
+      padding-bottom: 10px;
+    }
+
+    .modal h3 {
+      color: #ffaa00;
+      margin: 20px 0 10px 0;
+    }
+
+    .modal p {
+      line-height: 1.7;
+      margin-bottom: 15px;
+    }
+
+    .modal pre {
+      background: #0f1f0f;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      border: 1px solid #3d5c3d;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+
+    .modal ul, .modal ol {
+      margin-left: 20px;
+      margin-bottom: 15px;
+    }
+
+    .modal li {
+      line-height: 1.6;
+      margin-bottom: 5px;
+    }
+
+    .example {
+      background: #0f1f0f;
+      padding: 10px;
+      border-left: 3px solid #ffaa00;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .highlight {
+      color: #00ff7f;
+      font-weight: bold;
+    }
+
+    .shape-display {
+      font-family: 'Courier New', monospace;
+      background: #0f1f0f;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: inline-block;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Day 12: Christmas Tree Farm</h1>
+  <p class="subtitle">Advent of Code 2025 - Present Packing</p>
+
+  <div class="canvas-container">
+    <canvas id="visualizer" width="1280" height="720"></canvas>
+  </div>
+
+  <div class="controls">
+    <div class="file-input-wrapper">
+      <button>Load JSON</button>
+      <input type="file" id="fileInput" accept=".json">
+    </div>
+    <button id="playBtn">Play</button>
+    <button id="pauseBtn">Pause</button>
+    <button id="resetBtn">Reset</button>
+    <button id="recordBtn">Record</button>
+    <div class="speed-control">
+      <label for="speedControl">Speed:</label>
+      <input type="range" id="speedControl" min="0.5" max="5" step="0.5" value="1">
+      <span id="speedValue">1.0x</span>
+    </div>
+    <button id="descriptionBtn">Puzzle</button>
+    <button id="algorithmBtn">Algorithm</button>
+  </div>
+
+  <p id="status">Load a recording.json file to begin</p>
+
+  <!-- Puzzle Description Modal -->
+  <div id="descriptionModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h2>Day 12: Christmas Tree Farm</h2>
+
+      <p>You're almost out of time, but there can't be much left to decorate. Although there are no stairs, elevators, escalators, tunnels, chutes, teleporters, firepoles, or conduits here that would take you deeper into the North Pole base, there is a ventilation duct. You jump in.</p>
+
+      <p>After bumping around for a few minutes, you emerge into a large, well-lit cavern full of Christmas trees!</p>
+
+      <p>There are a few Elves here frantically decorating before the deadline. They think they'll be able to finish most of the work, but the one thing they're worried about is the presents for all the young Elves that live here at the North Pole. It's an ancient tradition to put the presents under the trees, but the Elves are worried they won't fit.</p>
+
+      <h3>The Problem</h3>
+
+      <p>The presents come in <span class="highlight">6 standard shapes</span> (each fits in a 3x3 grid). Each tree region has specific dimensions and requires certain numbers of each present shape to fit underneath.</p>
+
+      <p>Presents can be rotated and flipped, but cannot overlap (the <code>#</code> cells cannot share space). The empty cells (<code>.</code>) in a shape's diagram do not block other presents.</p>
+
+      <h3>Example Shapes</h3>
+      <div class="example">Shape 0:   Shape 4:   Shape 5:
+###        ###        ###
+##.        #..        .#.
+##.        ###        ###</div>
+
+      <h3>Example Region</h3>
+      <p>A 4x4 region with two shape-4 presents can fit like this:</p>
+      <div class="example">AAA.
+ABAB
+ABAB
+.BBB</div>
+
+      <h3>Task</h3>
+      <p>Count how many of the 1000 regions can fit all of their listed presents.</p>
+
+      <h3>Answer</h3>
+      <p><strong>Part 1:</strong> <span class="highlight">583</span> regions can fit all their presents</p>
+    </div>
+  </div>
+
+  <!-- Algorithm Modal -->
+  <div id="algorithmModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h2>How the Solution Works</h2>
+
+      <h3>Overview</h3>
+      <p>The solver uses a <strong>heuristic two-pass approach</strong> that can quickly classify most regions without solving the full bin-packing problem.</p>
+
+      <h3>Step 1: Area-Based Rejection</h3>
+      <p>Calculate the total area of all required presents. If the total present area exceeds the region area, the presents <strong>cannot possibly fit</strong> and the region is immediately rejected.</p>
+      <div class="example">Region: 4x4 = 16 cells
+Presents: 2x shape4 (7 cells each) = 14 cells
+14 ≤ 16, so area check passes</div>
+
+      <h3>Step 2: Slot-Based Acceptance</h3>
+      <p>Since all shapes fit within a 3x3 bounding box, count how many non-overlapping 3x3 slots exist in the region. If the number of presents ≤ number of slots, each present is <strong>guaranteed a home</strong>.</p>
+      <div class="example">Region: 12x6 → (12÷3) × (6÷3) = 4 × 2 = 8 slots
+Presents: 6 total
+6 ≤ 8 slots → Accepted!</div>
+
+      <h3>Step 3: Undetermined</h3>
+      <p>Regions that pass the area check but fail the slot check remain undetermined. These would require a full backtracking search to resolve, which the solver doesn't attempt.</p>
+
+      <h3>Why This Works</h3>
+      <ul>
+        <li>Most regions either clearly don't have enough space (rejected) or have plenty of room (accepted)</li>
+        <li>The heuristic avoids expensive NP-hard bin packing for obvious cases</li>
+        <li>For this puzzle's input, the heuristics are sufficient to classify all needed regions</li>
+      </ul>
+
+      <h3>Shape Areas</h3>
+      <div class="example">Shape 0: 7 cells    Shape 3: 7 cells
+Shape 1: 5 cells    Shape 4: 7 cells
+Shape 2: 8 cells    Shape 5: 7 cells</div>
+    </div>
+  </div>
+
+  <script src="day12-visualizer.js"></script>
+</body>
+</html>
